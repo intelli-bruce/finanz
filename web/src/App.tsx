@@ -20,6 +20,7 @@ function FinanzEditor() {
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [activeView, setActiveView] = useState<ViewType>('documents');
+  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
 
   // 선택된 파일 읽기
   const { data: fileContent, isLoading } = useQuery({
@@ -63,6 +64,19 @@ function FinanzEditor() {
   const handleFileSelect = (path: string) => {
     setSelectedFile(path);
   };
+
+  // Cmd+\ 키보드 단축키로 사이드바 토글
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === '\\') {
+        e.preventDefault();
+        setIsSidebarVisible(prev => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -149,14 +163,16 @@ function FinanzEditor() {
         {activeView === 'documents' ? (
           <>
             {/* 파일 탐색기 */}
-            <aside className="w-64 bg-white border-r flex-shrink-0">
-              <FileExplorer
-                currentPath={currentPath}
-                onFileSelect={handleFileSelect}
-                onPathChange={setCurrentPath}
-                selectedFile={selectedFile}
-              />
-            </aside>
+            {isSidebarVisible && (
+              <aside className="w-64 bg-white border-r flex-shrink-0 transition-all duration-200">
+                <FileExplorer
+                  currentPath={currentPath}
+                  onFileSelect={handleFileSelect}
+                  onPathChange={setCurrentPath}
+                  selectedFile={selectedFile}
+                />
+              </aside>
+            )}
 
             {/* 에디터 영역 */}
             <div className="flex-1 overflow-y-scroll" style={{ overflowY: 'scroll', WebkitOverflowScrolling: 'touch' }}>

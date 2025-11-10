@@ -418,6 +418,95 @@ app.post('/fs/mkdir', async (req: Request, res: Response) => {
   }
 });
 
+// ============================================
+// Supabase Storage 파일 접근 API (MCP용)
+// ============================================
+
+// 업로드된 파일 메타데이터 조회 (DB에서)
+app.get('/storage/files', async (req: Request, res: Response) => {
+  try {
+    const { data, error } = await supabase
+      .from('file_uploads')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    res.json({ files: data });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Supabase Storage에서 파일 다운로드
+app.get('/storage/download/:filename', async (req: Request, res: Response) => {
+  try {
+    const { filename } = req.params;
+
+    // Storage에서 파일 다운로드
+    const { data, error } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(filename);
+
+    if (error) {
+      throw error;
+    }
+
+    // Blob을 텍스트로 변환 (텍스트 파일인 경우)
+    const text = await data.text();
+
+    // 파일 메타데이터도 함께 반환
+    const { data: metadata } = await supabase
+      .from('file_uploads')
+      .select('*')
+      .eq('filename', filename)
+      .single();
+
+    res.json({
+      filename,
+      content: text,
+      metadata: metadata || null
+    });
+  } catch (error: any) {
+    if (error.message?.includes('Object not found')) {
+      res.status(404).json({ error: 'File not found' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// 파일이 텍스트인지 확인 (mimetype 기반)
+app.get('/storage/info/:filename', async (req: Request, res: Response) => {
+  try {
+    const { filename } = req.params;
+
+    const { data, error } = await supabase
+      .from('file_uploads')
+      .select('*')
+      .eq('filename', filename)
+      .single();
+
+    if (error) {
+      throw error;
+    }
+
+    // 공개 URL 생성
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filename);
+
+    res.json({
+      ...data,
+      url: publicUrlData.publicUrl
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`API server running on http://localhost:${PORT}`);
 });

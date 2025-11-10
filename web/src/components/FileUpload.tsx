@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload, FileText, X, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Download, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { uploadFile, getFiles, deleteFile, type FileListItem } from '@/api/client';
 
@@ -75,6 +75,24 @@ export function FileUpload() {
     return date.toLocaleString('ko-KR');
   };
 
+  const handleDownload = (file: FileListItem) => {
+    // 파일 다운로드
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = file.originalName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const getFileIcon = (mimetype: string) => {
+    if (mimetype.startsWith('image/')) return '🖼️';
+    if (mimetype.includes('pdf')) return '📄';
+    if (mimetype.includes('text')) return '📝';
+    if (mimetype.includes('json')) return '📋';
+    return '📎';
+  };
+
   return (
     <div className="space-y-4">
       {/* 업로드 영역 */}
@@ -110,38 +128,71 @@ export function FileUpload() {
 
       {/* 파일 목록 */}
       {files.length > 0 && (
-        <div className="border rounded-lg divide-y">
-          <div className="p-4 bg-gray-50">
-            <h3 className="text-sm font-semibold text-gray-900">업로드된 파일</h3>
+        <div className="border rounded-lg divide-y bg-white">
+          <div className="p-4 bg-gray-50 flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900">
+              업로드된 파일 ({files.length}개)
+            </h3>
+            <p className="text-xs text-gray-500">
+              다운로드하여 Claude Desktop에 첨부하세요
+            </p>
           </div>
           <div className="divide-y">
             {files.map((file: FileListItem) => (
-              <div key={file.filename} className="p-4 flex items-center justify-between hover:bg-gray-50">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <FileText className="h-5 w-5 text-gray-400 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <a
-                      href={file.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-blue-600 hover:underline block truncate"
+              <div key={file.filename} className="p-4 hover:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between gap-4">
+                  {/* 파일 정보 */}
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <span className="text-2xl flex-shrink-0 mt-0.5">
+                      {getFileIcon(file.mimetype)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-medium text-gray-900 truncate">
+                          {file.originalName}
+                        </h4>
+                        <a
+                          href={file.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                          title="새 탭에서 열기"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                        <span>{formatFileSize(file.size)}</span>
+                        <span>•</span>
+                        <span>{file.mimetype.split('/')[1]?.toUpperCase()}</span>
+                        <span>•</span>
+                        <span>{formatDate(file.created)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 액션 버튼 */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(file)}
+                      className="h-8"
                     >
-                      {file.originalName}
-                    </a>
-                    <p className="text-xs text-gray-500">
-                      {formatFileSize(file.size)} • {formatDate(file.created)}
-                    </p>
+                      <Download className="h-3.5 w-3.5 mr-1.5" />
+                      다운로드
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => deleteMutation.mutate(file.filename)}
+                      disabled={deleteMutation.isPending}
+                      className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => deleteMutation.mutate(file.filename)}
-                  disabled={deleteMutation.isPending}
-                  className="ml-2"
-                >
-                  <Trash2 className="h-4 w-4 text-red-500" />
-                </Button>
               </div>
             ))}
           </div>

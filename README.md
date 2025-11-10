@@ -123,6 +123,11 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 - `DELETE /fs/delete` - 파일/디렉토리 삭제
 - `POST /fs/mkdir` - 디렉토리 생성
 
+### Supabase Storage 접근 (MCP용)
+- `GET /storage/files` - 업로드된 파일 메타데이터 목록
+- `GET /storage/download/:filename` - 파일 다운로드 및 읽기
+- `GET /storage/info/:filename` - 파일 정보 조회
+
 ## MCP Tools
 
 ### 기존 재무 데이터 관리
@@ -136,6 +141,11 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 - `write_file` - 파일 생성 또는 덮어쓰기
 - `delete_file` - 파일 또는 디렉토리 삭제
 - `create_directory` - 디렉토리 생성
+
+### Supabase Storage 관리
+- `list_uploaded_files` - 업로드된 파일 목록 조회
+- `read_uploaded_file` - 업로드된 파일 다운로드 및 읽기
+- `get_uploaded_file_info` - 파일 메타데이터 조회
 
 ## 데이터 형식
 

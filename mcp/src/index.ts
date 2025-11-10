@@ -147,6 +147,42 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['path'],
         },
       },
+      {
+        name: 'list_uploaded_files',
+        description: 'Supabase Storage에 업로드된 파일 목록을 조회합니다. PDF, 이미지, 문서 등 모든 업로드 파일을 확인할 수 있습니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
+      {
+        name: 'read_uploaded_file',
+        description: 'Supabase Storage에서 업로드된 파일을 다운로드하여 읽습니다. 텍스트 파일(txt, md, json 등)의 내용을 읽을 수 있습니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filename: {
+              type: 'string',
+              description: '읽을 파일명 (Storage에 저장된 파일명)',
+            },
+          },
+          required: ['filename'],
+        },
+      },
+      {
+        name: 'get_uploaded_file_info',
+        description: '업로드된 파일의 메타데이터(원본 파일명, 크기, 타입, URL 등)를 조회합니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            filename: {
+              type: 'string',
+              description: '조회할 파일명',
+            },
+          },
+          required: ['filename'],
+        },
+      },
     ],
   };
 });
@@ -303,6 +339,83 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `디렉토리가 생성되었습니다: ${args.path}`,
+            },
+          ],
+        };
+      }
+
+      case 'list_uploaded_files': {
+        const result = await callAPI('/storage/files');
+
+        if (!result.files || result.files.length === 0) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: '업로드된 파일이 없습니다.',
+              },
+            ],
+          };
+        }
+
+        const fileList = result.files
+          .map((file: any) => {
+            const size = (file.size / 1024).toFixed(2);
+            return `📎 ${file.original_name}\n   파일명: ${file.filename}\n   크기: ${size}KB\n   타입: ${file.mimetype}\n   업로드: ${new Date(file.created_at).toLocaleString('ko-KR')}`;
+          })
+          .join('\n\n');
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `업로드된 파일 목록 (총 ${result.files.length}개):\n\n${fileList}`,
+            },
+          ],
+        };
+      }
+
+      case 'read_uploaded_file': {
+        if (!args || typeof args.filename !== 'string') {
+          throw new Error('filename parameter is required');
+        }
+
+        const result = await callAPI(`/storage/download/${encodeURIComponent(args.filename)}`);
+
+        const metadata = result.metadata
+          ? `\n\n[파일 정보]\n원본 파일명: ${result.metadata.original_name}\n크기: ${(result.metadata.size / 1024).toFixed(2)}KB\n타입: ${result.metadata.mimetype}`
+          : '';
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `${result.content}${metadata}`,
+            },
+          ],
+        };
+      }
+
+      case 'get_uploaded_file_info': {
+        if (!args || typeof args.filename !== 'string') {
+          throw new Error('filename parameter is required');
+        }
+
+        const result = await callAPI(`/storage/info/${encodeURIComponent(args.filename)}`);
+
+        const info = `파일 정보:
+원본 파일명: ${result.original_name}
+저장된 파일명: ${result.filename}
+크기: ${(result.size / 1024).toFixed(2)}KB
+타입: ${result.mimetype}
+업로드 일시: ${new Date(result.created_at).toLocaleString('ko-KR')}
+URL: ${result.url}`;
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: info,
             },
           ],
         };

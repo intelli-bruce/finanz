@@ -38,4 +38,49 @@ export const appendMarkdown = async (content: string): Promise<void> => {
   await apiClient.patch<ApiResponse>('/markdown/append', { content });
 };
 
+// 파일 관련 타입
+export interface UploadedFile {
+  filename: string;
+  originalName: string;
+  size: number;
+  mimetype: string;
+  url: string;
+  path: string;
+}
+
+export interface FileListItem {
+  filename: string;
+  originalName: string;
+  size: number;
+  mimetype: string;
+  created: string;
+  modified: string;
+  url: string;
+}
+
+// 파일 업로드
+export const uploadFile = async (file: File): Promise<UploadedFile> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await axios.post(`${API_BASE_URL}/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data.file;
+};
+
+// 파일 목록 조회
+export const getFiles = async (): Promise<FileListItem[]> => {
+  const response = await apiClient.get<{ files: FileListItem[] }>('/files');
+  return response.data.files;
+};
+
+// 파일 삭제
+export const deleteFile = async (filename: string): Promise<void> => {
+  await apiClient.delete(`/files/${filename}`);
+};
+
 export default apiClient;

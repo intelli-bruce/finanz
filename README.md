@@ -6,7 +6,7 @@
 
 ```
 finanz/
-├── api/          # REST API 서버
+├── api/          # REST API 서버 (Express)
 ├── mcp/          # MCP 서버 (Claude 연동)
 ├── web/          # 웹 UI (Vite + React)
 └── data/         # 마크다운 데이터 저장소
@@ -14,47 +14,71 @@ finanz/
 
 ## 설치
 
-### 1. API 서버 설치
+이 프로젝트는 **npm workspaces**를 사용하는 monorepo 구조입니다.
+
+### 1. 전체 프로젝트 설치 (권장)
+
+루트 디렉토리에서 한 번에 모든 워크스페이스 설치:
 
 ```bash
-cd api
 npm install
 ```
 
-### 2. MCP 서버 설치
+### 2. 개별 워크스페이스 설치 (선택사항)
 
 ```bash
-cd mcp
-npm install
-npm run build
+# API 서버만 설치
+npm install --workspace=api
+
+# 웹 UI만 설치
+npm install --workspace=web
 ```
 
-### 3. 웹 UI 설치
+## 환경 변수 설정
 
-```bash
-cd web
-npm install
+API 서버 실행 전에 환경 변수를 설정해야 합니다.
+
+`api/.env` 파일 생성:
+
+```env
+SUPABASE_URL=your-supabase-url
+SUPABASE_ANON_KEY=your-supabase-anon-key
+PORT=3002
 ```
 
 ## 사용 방법
 
-### 1. API 서버 실행
+### 1. 개발 서버 실행
+
+#### 모든 서버 동시 실행
 
 ```bash
-cd api
-PORT=3002 npm run dev
-```
-
-API 서버가 http://localhost:3002 에서 실행됩니다.
-
-### 2. 웹 UI 실행
-
-```bash
-cd web
 npm run dev
 ```
 
-웹 UI가 http://localhost:5173 에서 실행됩니다. 브라우저에서 접속하여 마크다운을 편집할 수 있습니다.
+#### 개별 실행
+
+```bash
+# API 서버만 실행
+npm run dev:api
+
+# 웹 UI만 실행
+npm run dev:web
+```
+
+- API 서버: http://localhost:3002
+- 웹 UI: http://localhost:5173
+
+### 2. 빌드
+
+```bash
+# 모든 워크스페이스 빌드
+npm run build
+
+# 개별 빌드
+npm run build:api
+npm run build:web
+```
 
 ### 3. MCP 서버 설정
 
@@ -82,9 +106,15 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 
 ## API 엔드포인트
 
+### 마크다운 관리
 - `GET /markdown` - 재무 데이터 읽기
 - `POST /markdown` - 재무 데이터 쓰기 (전체 덮어쓰기)
 - `PATCH /markdown/append` - 재무 데이터에 내용 추가
+
+### 파일 관리 (Supabase Storage)
+- `POST /upload` - 파일 업로드
+- `GET /files` - 업로드된 파일 목록 조회
+- `DELETE /files/:filename` - 파일 삭제
 
 ## MCP Tools
 
@@ -116,25 +146,34 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 
 ## 기술 스택
 
+### Monorepo
+- npm workspaces
+
 ### API 서버
 - Node.js + Express
 - TypeScript
+- Supabase Storage (파일 업로드)
+- Multer (파일 처리)
 
 ### MCP 서버
 - @modelcontextprotocol/sdk
 - Node.js + TypeScript
 
 ### 웹 UI
-- Vite + React 18
+- Vite + React 19
 - TypeScript
 - Tailwind CSS
 - MDXEditor (마크다운 에디터)
 - TanStack Query (React Query)
 - Axios
 
+### 인프라
+- Supabase (Storage)
+
 ## 로드맵
 
 - [x] Phase 1: API + MCP 서버 (마크다운 기반)
 - [x] Phase 2: 웹 UI 및 마크다운 에디터
-- [ ] Phase 3: 데이터 시각화 (차트, 통계)
-- [ ] Phase 4: 데이터베이스 전환 (SQLite/PostgreSQL)
+- [x] Phase 3: 파일 업로드 기능 (Supabase Storage)
+- [ ] Phase 4: 데이터 시각화 (차트, 통계)
+- [ ] Phase 5: 데이터베이스 전환 (Supabase DB)

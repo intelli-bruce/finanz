@@ -8,6 +8,17 @@
         "env": {
           "FINANZ_API_URL": "http://localhost:3002"
         }
+      },
+      "finanz-supabase": {
+        "command": "npx",
+        "args": [
+          "-y",
+          "@supabase/mcp-server-supabase",
+          "--project-ref=utdeuicmfkpfktdldpwb"
+        ],
+        "env": {
+          "SUPABASE_ACCESS_TOKEN": "sbp_e0ec557be4696a239d49e1e9c9cb64b7a7f777ff"
+        }
       }
     }
   }

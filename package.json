@@ -1,0 +1,24 @@
+{
+  "name": "finanz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Financial management application with markdown editor and file uploads",
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=api & npm run dev --workspace=web",
+    "dev:api": "npm run dev --workspace=api",
+    "dev:web": "npm run dev --workspace=web",
+    "build": "npm run build --workspaces",
+    "build:api": "npm run build --workspace=api",
+    "build:web": "npm run build --workspace=web",
+    "start:api": "npm run start --workspace=api",
+    "clean": "rm -rf api/dist web/dist api/node_modules web/node_modules node_modules"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

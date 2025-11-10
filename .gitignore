@@ -1,5 +1,23 @@
+# Dependencies
 node_modules/
+**/node_modules/
+
+# Build output
 dist/
-.DS_Store
-*.log
+**/dist/
+
+# Environment variables
 .env
+.env.local
+.env.*.local
+**/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+
+# Uploads (now using Supabase Storage)
+data/uploads/

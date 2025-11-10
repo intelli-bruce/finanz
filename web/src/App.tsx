@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from '@tanstack/react-query';
-import { MDXEditor, headingsPlugin, listsPlugin, quotePlugin, thematicBreakPlugin, markdownShortcutPlugin } from '@mdxeditor/editor';
+import CodeMirror from '@uiw/react-codemirror';
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+import { languages } from '@codemirror/language-data';
 import { Save, FolderOpen, Upload, Unlock } from 'lucide-react';
-import '@mdxeditor/editor/style.css';
 import { readFile, writeFile } from './api/client';
 import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/FileUpload';
@@ -44,8 +45,14 @@ function FinanzEditor() {
   useEffect(() => {
     if (fileContent !== undefined) {
       setContent(fileContent);
+      // 코드 블록 디버깅
+      const codeBlockMatch = fileContent.match(/```[\s\S]*?```/g);
+      console.log('Code blocks found:', codeBlockMatch?.length || 0);
+      if (codeBlockMatch) {
+        console.log('First code block:', codeBlockMatch[0].substring(0, 200));
+      }
     }
-  }, [fileContent]);
+  }, [fileContent, selectedFile, isLoading]);
 
   const handleSave = () => {
     if (!selectedFile) return;
@@ -152,31 +159,53 @@ function FinanzEditor() {
             </aside>
 
             {/* 에디터 영역 */}
-            <div className="flex-1 flex items-center justify-center overflow-auto">
+            <div className="flex-1 overflow-y-scroll" style={{ overflowY: 'scroll', WebkitOverflowScrolling: 'touch' }}>
               {isLoading ? (
-                <div className="text-sm text-gray-500">로딩 중...</div>
-              ) : selectedFile ? (
-                <div className="w-full max-w-4xl mx-auto p-8">
+                <div className="flex items-center justify-center h-full text-sm text-gray-500">로딩 중...</div>
+              ) : selectedFile && fileContent !== undefined ? (
+                <div className="w-full max-w-4xl mx-auto py-8 px-8">
                   <div className="bg-white rounded-lg shadow-sm border p-8">
-                    <MDXEditor
-                      key={selectedFile}
-                      markdown={content}
-                      onChange={setContent}
-                      plugins={[
-                        headingsPlugin(),
-                        listsPlugin(),
-                        quotePlugin(),
-                        thematicBreakPlugin(),
-                        markdownShortcutPlugin(),
+                    <CodeMirror
+                      value={content}
+                      height="auto"
+                      minHeight="600px"
+                      extensions={[
+                        markdown({ base: markdownLanguage, codeLanguages: languages })
                       ]}
-                      className="min-h-[calc(100vh-200px)]"
+                      onChange={(value) => setContent(value)}
+                      theme="light"
+                      basicSetup={{
+                        lineNumbers: true,
+                        highlightActiveLineGutter: true,
+                        highlightSpecialChars: true,
+                        foldGutter: true,
+                        drawSelection: true,
+                        dropCursor: true,
+                        allowMultipleSelections: true,
+                        indentOnInput: true,
+                        bracketMatching: true,
+                        closeBrackets: true,
+                        autocompletion: true,
+                        rectangularSelection: true,
+                        crosshairCursor: true,
+                        highlightActiveLine: true,
+                        highlightSelectionMatches: true,
+                        closeBracketsKeymap: true,
+                        searchKeymap: true,
+                        foldKeymap: true,
+                        completionKeymap: true,
+                        lintKeymap: true,
+                      }}
+                      style={{ fontSize: '14px' }}
                     />
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-gray-500">
-                  <FolderOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
-                  <p className="text-sm">파일을 선택하세요</p>
+                <div className="flex items-center justify-center h-full text-center text-gray-500">
+                  <div>
+                    <FolderOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                    <p className="text-sm">파일을 선택하세요</p>
+                  </div>
                 </div>
               )}
             </div>

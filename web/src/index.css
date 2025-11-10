@@ -59,3 +59,21 @@
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   }
 }
+
+/* MDXEditor code block fixes */
+.mdx-editor-wrapper pre {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  white-space: pre !important;
+  max-height: none !important;
+}
+
+.mdx-editor-wrapper code {
+  white-space: pre !important;
+  overflow-wrap: normal !important;
+}
+
+.mdx-editor-wrapper [role="textbox"] {
+  overflow: visible !important;
+  max-height: none !important;
+}

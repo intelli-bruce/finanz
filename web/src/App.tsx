@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from '@tanstack/react-query';
 import { MDXEditor, headingsPlugin, listsPlugin, quotePlugin, thematicBreakPlugin, markdownShortcutPlugin } from '@mdxeditor/editor';
-import { Save, FolderOpen, Upload } from 'lucide-react';
+import { Save, FolderOpen, Upload, Unlock } from 'lucide-react';
 import '@mdxeditor/editor/style.css';
 import { readFile, writeFile } from './api/client';
 import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/FileUpload';
 import { FileExplorer } from '@/components/FileExplorer';
+import { ExcelDecryptor } from '@/components/ExcelDecryptor';
 
 const queryClient = new QueryClient();
 
-type ViewType = 'documents' | 'uploads';
+type ViewType = 'documents' | 'uploads' | 'decrypt';
 
 function FinanzEditor() {
   const [currentPath, setCurrentPath] = useState('');
@@ -96,6 +97,21 @@ function FinanzEditor() {
               <Upload className="h-4 w-4" />
               <span>Uploads</span>
             </button>
+            <button
+              onClick={() => setActiveView('decrypt')}
+              className={`
+                flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                transition-all duration-200
+                ${
+                  activeView === 'decrypt'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }
+              `}
+            >
+              <Unlock className="h-4 w-4" />
+              <span>Decrypt</span>
+            </button>
           </nav>
         </div>
 
@@ -165,10 +181,16 @@ function FinanzEditor() {
               )}
             </div>
           </>
-        ) : (
+        ) : activeView === 'uploads' ? (
           <div className="flex-1 overflow-auto">
             <div className="max-w-4xl mx-auto p-8">
               <FileUpload />
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-auto">
+            <div className="p-8">
+              <ExcelDecryptor />
             </div>
           </div>
         )}

@@ -1,10 +1,16 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import fs from 'fs/promises';
+import fssync from 'fs';
 import path from 'path';
 import multer from 'multer';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import * as XLSX from 'xlsx';
+
+const execPromise = promisify(exec);
 
 // 환경 변수 로드
 dotenv.config();
@@ -206,12 +212,58 @@ app.get('/files', async (req: Request, res: Response) => {
         mimetype: file.mimetype,
         created: file.created_at,
         modified: file.updated_at,
-        url: publicUrlData.publicUrl
+        url: publicUrlData.publicUrl,
+        tags: file.tags || []
       };
     });
 
     res.json({ files: fileList });
   } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 파일 메타데이터 업데이트
+app.patch('/files/:filename', async (req: Request, res: Response) => {
+  try {
+    const { filename } = req.params;
+    const { originalName, tags } = req.body;
+
+    console.log('Update request:', { filename, originalName, tags });
+
+    const updateData: any = {
+      updated_at: new Date().toISOString()
+    };
+    if (originalName !== undefined) {
+      updateData.original_name = originalName;
+    }
+    if (tags !== undefined) {
+      updateData.tags = tags;
+    }
+
+    console.log('Update data:', updateData);
+
+    // DB에서 메타데이터 업데이트
+    const { data, error: dbError } = await supabase
+      .from('file_uploads')
+      .update(updateData)
+      .eq('filename', filename)
+      .select();
+
+    console.log('Update result:', { data, error: dbError });
+
+    if (dbError) {
+      console.error('Database update error:', dbError);
+      throw dbError;
+    }
+
+    if (!data || data.length === 0) {
+      throw new Error('File not found');
+    }
+
+    res.json({ success: true, message: 'File metadata updated successfully' });
+  } catch (error: any) {
+    console.error('Update error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -504,6 +556,111 @@ app.get('/storage/info/:filename', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// Excel 암호 해제 API
+// ============================================
+
+// Excel 파일 암호 해제
+app.post('/decrypt-excel', upload.single('file'), async (req: Request, res: Response) => {
+  const tempInputPath = path.join('/tmp', `input-${Date.now()}.xlsx`);
+  const tempOutputPath = path.join('/tmp', `output-${Date.now()}.xlsx`);
+
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const { password, format = 'xlsx' } = req.body;
+
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
+    }
+
+    console.log('Decrypt request:', {
+      filename: req.file.originalname,
+      size: req.file.size,
+      format
+    });
+
+    // 임시 파일로 저장
+    await fs.writeFile(tempInputPath, req.file.buffer);
+
+    // Python msoffcrypto-tool로 암호 해제
+    const decryptCommand = `python3 -c "
+import sys
+import msoffcrypto
+
+encrypted = open('${tempInputPath}', 'rb')
+decrypted = open('${tempOutputPath}', 'wb')
+
+try:
+    file = msoffcrypto.OfficeFile(encrypted)
+    file.load_key(password='${password.replace(/'/g, "\\'")}')
+    file.decrypt(decrypted)
+    sys.exit(0)
+except Exception as e:
+    sys.stderr.write(str(e))
+    sys.exit(1)
+finally:
+    encrypted.close()
+    decrypted.close()
+"`;
+
+    try {
+      await execPromise(decryptCommand);
+    } catch (error: any) {
+      console.error('Decrypt command error:', error.stderr);
+      if (error.stderr?.includes('password') || error.stderr?.includes('Invalid') || error.code === 1) {
+        await fs.unlink(tempInputPath).catch(() => {});
+        await fs.unlink(tempOutputPath).catch(() => {});
+        return res.status(401).json({ error: '비밀번호가 올바르지 않거나 암호화되지 않은 파일입니다' });
+      }
+      throw error;
+    }
+
+    // 암호 해제된 파일 읽기
+    const decryptedBuffer = await fs.readFile(tempOutputPath);
+
+    if (format === 'csv') {
+      // Excel을 CSV로 변환
+      const workbook = XLSX.read(decryptedBuffer);
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const csv = XLSX.utils.sheet_to_csv(firstSheet);
+
+      const originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+      const csvFilename = originalname.replace(/\.xlsx?$/i, '.csv');
+
+      res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(csvFilename)}"`);
+      res.send('\uFEFF' + csv); // UTF-8 BOM 추가
+    } else {
+      // Excel로 반환
+      const originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+      const xlsxFilename = originalname.replace(/\.xlsx?$/i, '_decrypted.xlsx');
+
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(xlsxFilename)}"`);
+      res.send(decryptedBuffer);
+    }
+
+    // 임시 파일 삭제
+    await fs.unlink(tempInputPath).catch(() => {});
+    await fs.unlink(tempOutputPath).catch(() => {});
+  } catch (error: any) {
+    console.error('Decrypt error:', error);
+
+    // 임시 파일 정리
+    await fs.unlink(tempInputPath).catch(() => {});
+    await fs.unlink(tempOutputPath).catch(() => {});
+
+    if (error.message?.includes('password')) {
+      res.status(401).json({ error: '비밀번호가 올바르지 않습니다' });
+    } else {
+      res.status(500).json({ error: error.message || '암호 해제에 실패했습니다' });
+    }
   }
 });
 

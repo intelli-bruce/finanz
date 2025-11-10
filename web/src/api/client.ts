@@ -56,6 +56,7 @@ export interface FileListItem {
   created: string;
   modified: string;
   url: string;
+  tags: string[];
 }
 
 // 파일 업로드
@@ -76,6 +77,14 @@ export const uploadFile = async (file: File): Promise<UploadedFile> => {
 export const getFiles = async (): Promise<FileListItem[]> => {
   const response = await apiClient.get<{ files: FileListItem[] }>('/files');
   return response.data.files;
+};
+
+// 파일 메타데이터 업데이트
+export const updateFileMetadata = async (
+  filename: string,
+  updates: { originalName?: string; tags?: string[] }
+): Promise<void> => {
+  await apiClient.patch(`/files/${filename}`, updates);
 };
 
 // 파일 삭제

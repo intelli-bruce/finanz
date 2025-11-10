@@ -1,11 +1,15 @@
 import { useState, useRef } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Upload, Trash2, Download, ExternalLink } from 'lucide-react';
+import { Upload, Trash2, Download, ExternalLink, Edit2, Check, X, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { uploadFile, getFiles, deleteFile, type FileListItem } from '@/api/client';
+import { uploadFile, getFiles, deleteFile, updateFileMetadata, type FileListItem } from '@/api/client';
 
 export function FileUpload() {
   const [isDragging, setIsDragging] = useState(false);
+  const [editingFile, setEditingFile] = useState<string | null>(null);
+  const [editedName, setEditedName] = useState('');
+  const [addingTagFile, setAddingTagFile] = useState<string | null>(null);
+  const [newTag, setNewTag] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -20,6 +24,20 @@ export function FileUpload() {
     mutationFn: uploadFile,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['files'] });
+    },
+  });
+
+  // 파일 메타데이터 업데이트
+  const updateMutation = useMutation({
+    mutationFn: ({ filename, updates }: { filename: string; updates: { originalName?: string; tags?: string[] } }) =>
+      updateFileMetadata(filename, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['files'] });
+      // 편집 상태 초기화
+      setEditingFile(null);
+      setEditedName('');
+      setAddingTagFile(null);
+      setNewTag('');
     },
   });
 
@@ -93,6 +111,59 @@ export function FileUpload() {
     return '📎';
   };
 
+  // 파일명 편집 시작
+  const startEditingName = (file: FileListItem) => {
+    setEditingFile(file.filename);
+    setEditedName(file.originalName);
+  };
+
+  // 파일명 편집 저장
+  const saveEditedName = (filename: string) => {
+    if (editedName.trim() && editedName !== files.find(f => f.filename === filename)?.originalName) {
+      updateMutation.mutate({
+        filename,
+        updates: { originalName: editedName.trim() }
+      });
+    } else {
+      // 변경사항이 없으면 편집 모드만 종료
+      setEditingFile(null);
+      setEditedName('');
+    }
+  };
+
+  // 파일명 편집 취소
+  const cancelEditingName = () => {
+    setEditingFile(null);
+    setEditedName('');
+  };
+
+  // 태그 추가 모드 시작
+  const startAddingTag = (filename: string) => {
+    setAddingTagFile(filename);
+    setNewTag('');
+  };
+
+  // 태그 추가
+  const addTag = (file: FileListItem) => {
+    if (newTag.trim()) {
+      const updatedTags = [...(file.tags || []), newTag.trim()];
+      updateMutation.mutate({
+        filename: file.filename,
+        updates: { tags: updatedTags }
+      });
+      // mutation이 성공하면 onSuccess에서 상태가 초기화됨
+    }
+  };
+
+  // 태그 삭제
+  const removeTag = (file: FileListItem, tagToRemove: string) => {
+    const updatedTags = file.tags.filter(tag => tag !== tagToRemove);
+    updateMutation.mutate({
+      filename: file.filename,
+      updates: { tags: updatedTags }
+    });
+  };
+
   return (
     <div className="space-y-4">
       {/* 업로드 영역 */}
@@ -147,26 +218,120 @@ export function FileUpload() {
                       {getFileIcon(file.mimetype)}
                     </span>
                     <div className="flex-1 min-w-0">
+                      {/* 파일명 */}
                       <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-medium text-gray-900 truncate">
-                          {file.originalName}
-                        </h4>
-                        <a
-                          href={file.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-400 hover:text-gray-600 flex-shrink-0"
-                          title="새 탭에서 열기"
-                        >
-                          <ExternalLink className="h-3.5 w-3.5" />
-                        </a>
+                        {editingFile === file.filename ? (
+                          <>
+                            <input
+                              type="text"
+                              value={editedName}
+                              onChange={(e) => setEditedName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveEditedName(file.filename);
+                                if (e.key === 'Escape') cancelEditingName();
+                              }}
+                              className="text-sm font-medium text-gray-900 border rounded px-2 py-1 flex-1"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => saveEditedName(file.filename)}
+                              className="text-green-600 hover:text-green-700 flex-shrink-0"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={cancelEditingName}
+                              className="text-red-600 hover:text-red-700 flex-shrink-0"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <h4 className="text-sm font-medium text-gray-900 truncate">
+                              {file.originalName}
+                            </h4>
+                            <button
+                              onClick={() => startEditingName(file)}
+                              className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                              title="파일명 수정"
+                            >
+                              <Edit2 className="h-3.5 w-3.5" />
+                            </button>
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                              title="새 탭에서 열기"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          </>
+                        )}
                       </div>
+
+                      {/* 메타데이터 */}
                       <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
                         <span>{formatFileSize(file.size)}</span>
                         <span>•</span>
                         <span>{file.mimetype.split('/')[1]?.toUpperCase()}</span>
                         <span>•</span>
                         <span>{formatDate(file.created)}</span>
+                      </div>
+
+                      {/* 태그 */}
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
+                        {file.tags?.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                          >
+                            {tag}
+                            <button
+                              onClick={() => removeTag(file, tag)}
+                              className="hover:text-blue-900"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                        {addingTagFile === file.filename ? (
+                          <div className="inline-flex items-center gap-1">
+                            <input
+                              type="text"
+                              value={newTag}
+                              onChange={(e) => setNewTag(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') addTag(file);
+                                if (e.key === 'Escape') setAddingTagFile(null);
+                              }}
+                              placeholder="태그 입력"
+                              className="text-xs border rounded px-2 py-0.5 w-24"
+                              autoFocus
+                            />
+                            <button
+                              onClick={() => addTag(file)}
+                              className="text-green-600 hover:text-green-700"
+                            >
+                              <Check className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={() => setAddingTagFile(null)}
+                              className="text-red-600 hover:text-red-700"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => startAddingTag(file.filename)}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                          >
+                            <Tag className="h-3 w-3" />
+                            태그 추가
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -83,4 +83,48 @@ export const deleteFile = async (filename: string): Promise<void> => {
   await apiClient.delete(`/files/${filename}`);
 };
 
+// ============================================
+// 파일 시스템 관리 API
+// ============================================
+
+export interface FileSystemItem {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  size: number;
+  created: string;
+  modified: string;
+}
+
+// 파일/디렉토리 목록 조회
+export const listFiles = async (path: string = ''): Promise<FileSystemItem[]> => {
+  const response = await apiClient.get<{ items: FileSystemItem[] }>(
+    `/fs/list?path=${encodeURIComponent(path)}`
+  );
+  return response.data.items;
+};
+
+// 파일 읽기
+export const readFile = async (path: string): Promise<string> => {
+  const response = await apiClient.get<{ content: string }>(
+    `/fs/read?path=${encodeURIComponent(path)}`
+  );
+  return response.data.content;
+};
+
+// 파일 쓰기
+export const writeFile = async (path: string, content: string): Promise<void> => {
+  await apiClient.post('/fs/write', { path, content });
+};
+
+// 파일/디렉토리 삭제
+export const deleteFileOrDir = async (path: string): Promise<void> => {
+  await apiClient.delete(`/fs/delete?path=${encodeURIComponent(path)}`);
+};
+
+// 디렉토리 생성
+export const createDirectory = async (path: string): Promise<void> => {
+  await apiClient.post('/fs/mkdir', { path });
+};
+
 export default apiClient;

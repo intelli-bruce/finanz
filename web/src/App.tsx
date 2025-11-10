@@ -1,33 +1,37 @@
 import { useState, useEffect } from 'react';
 import { QueryClient, QueryClientProvider, useQuery, useMutation } from '@tanstack/react-query';
 import { MDXEditor, headingsPlugin, listsPlugin, quotePlugin, thematicBreakPlugin, markdownShortcutPlugin } from '@mdxeditor/editor';
-import { RefreshCw, Save, FileText, Upload } from 'lucide-react';
+import { Save, FolderOpen, Upload } from 'lucide-react';
 import '@mdxeditor/editor/style.css';
-import { readMarkdown, writeMarkdown } from './api/client';
+import { readFile, writeFile } from './api/client';
 import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/FileUpload';
+import { FileExplorer } from '@/components/FileExplorer';
 
 const queryClient = new QueryClient();
 
-type TabType = 'editor' | 'files';
+type ViewType = 'documents' | 'uploads';
 
 function FinanzEditor() {
+  const [currentPath, setCurrentPath] = useState('');
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [content, setContent] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<TabType>('editor');
+  const [activeView, setActiveView] = useState<ViewType>('documents');
 
-  // 마크다운 파일 읽기
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['markdown'],
-    queryFn: readMarkdown,
+  // 선택된 파일 읽기
+  const { data: fileContent, isLoading } = useQuery({
+    queryKey: ['file-content', selectedFile],
+    queryFn: () => readFile(selectedFile!),
+    enabled: !!selectedFile,
   });
 
-  // 마크다운 파일 쓰기
-  const mutation = useMutation({
-    mutationFn: writeMarkdown,
+  // 파일 저장
+  const saveMutation = useMutation({
+    mutationFn: (data: { path: string; content: string }) =>
+      writeFile(data.path, data.content),
     onSuccess: () => {
       setIsSaving(false);
-      alert('저장되었습니다!');
     },
     onError: (error) => {
       setIsSaving(false);
@@ -35,121 +39,138 @@ function FinanzEditor() {
     },
   });
 
-  // 데이터 로드 시 content 업데이트
+  // 파일 내용 로드
   useEffect(() => {
-    if (data) {
-      setContent(data);
+    if (fileContent !== undefined) {
+      setContent(fileContent);
     }
-  }, [data]);
+  }, [fileContent]);
 
   const handleSave = () => {
+    if (!selectedFile) return;
     setIsSaving(true);
-    mutation.mutate(content);
+    saveMutation.mutate({ path: selectedFile, content });
   };
 
-  const handleRefresh = () => {
-    refetch();
+  const handleFileSelect = (path: string) => {
+    setSelectedFile(path);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-muted-foreground">로딩 중...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-xl text-destructive">
-          에러: {error instanceof Error ? error.message : '알 수 없는 에러'}
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* 헤더 - 고정 */}
-      <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
-        <div className="max-w-[900px] mx-auto px-6">
-          <div className="flex h-14 items-center justify-between">
-            <h1 className="text-lg font-semibold text-gray-900">Finanz</h1>
-            {activeTab === 'editor' && (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleRefresh}
-                >
-                  <RefreshCw className="h-4 w-4 mr-1.5" />
-                  새로고침
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={isSaving}
-                >
-                  <Save className="h-4 w-4 mr-1.5" />
-                  {isSaving ? '저장 중...' : '저장'}
-                </Button>
-              </div>
-            )}
-          </div>
+    <div className="h-screen flex flex-col bg-gray-50">
+      {/* 미니멀 헤더 */}
+      <header className="flex items-center justify-between px-8 h-16 bg-white border-b">
+        {/* 로고 영역 */}
+        <div className="flex items-center gap-8">
+          <h1 className="text-xl font-bold text-gray-900 tracking-tight">Finanz</h1>
 
-          {/* 탭 */}
-          <div className="flex gap-4 -mb-px">
+          {/* 뷰 전환 탭 */}
+          <nav className="flex gap-1">
             <button
-              onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'editor'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
+              onClick={() => setActiveView('documents')}
+              className={`
+                flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                transition-all duration-200
+                ${
+                  activeView === 'documents'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }
+              `}
             >
-              <FileText className="h-4 w-4" />
-              에디터
+              <FolderOpen className="h-4 w-4" />
+              <span>Documents</span>
             </button>
             <button
-              onClick={() => setActiveTab('files')}
-              className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === 'files'
-                  ? 'border-blue-600 text-blue-600'
-                  : 'border-transparent text-gray-600 hover:text-gray-900'
-              }`}
+              onClick={() => setActiveView('uploads')}
+              className={`
+                flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg
+                transition-all duration-200
+                ${
+                  activeView === 'uploads'
+                    ? 'bg-gray-900 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }
+              `}
             >
               <Upload className="h-4 w-4" />
-              파일
+              <span>Uploads</span>
             </button>
-          </div>
+          </nav>
+        </div>
+
+        {/* 우측 액션 영역 */}
+        <div className="flex items-center gap-3">
+          {activeView === 'documents' && selectedFile && (
+            <>
+              <div className="text-sm text-gray-500 font-mono truncate max-w-xs">
+                {selectedFile}
+              </div>
+              <div className="h-4 w-px bg-gray-200" />
+              <Button
+                size="sm"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-gray-800 text-white"
+              >
+                <Save className="h-3.5 w-3.5 mr-2" />
+                {isSaving ? 'Saving...' : 'Save'}
+              </Button>
+            </>
+          )}
         </div>
       </header>
 
-      {/* 컨텐츠 영역 */}
-      <main className="max-w-[900px] mx-auto px-6 py-8">
-        {activeTab === 'editor' ? (
-          <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
-            <div className="p-12">
-              {data && (
-                <MDXEditor
-                  key={data}
-                  markdown={data}
-                  onChange={setContent}
-                  plugins={[
-                    headingsPlugin(),
-                    listsPlugin(),
-                    quotePlugin(),
-                    thematicBreakPlugin(),
-                    markdownShortcutPlugin(),
-                  ]}
-                  className="min-h-[calc(100vh-250px)]"
-                />
+      {/* 메인 컨텐츠 */}
+      <main className="flex-1 flex overflow-hidden">
+        {activeView === 'documents' ? (
+          <>
+            {/* 파일 탐색기 */}
+            <aside className="w-64 bg-white border-r flex-shrink-0">
+              <FileExplorer
+                currentPath={currentPath}
+                onFileSelect={handleFileSelect}
+                onPathChange={setCurrentPath}
+                selectedFile={selectedFile}
+              />
+            </aside>
+
+            {/* 에디터 영역 */}
+            <div className="flex-1 flex items-center justify-center overflow-auto">
+              {isLoading ? (
+                <div className="text-sm text-gray-500">로딩 중...</div>
+              ) : selectedFile ? (
+                <div className="w-full max-w-4xl mx-auto p-8">
+                  <div className="bg-white rounded-lg shadow-sm border p-8">
+                    <MDXEditor
+                      key={selectedFile}
+                      markdown={content}
+                      onChange={setContent}
+                      plugins={[
+                        headingsPlugin(),
+                        listsPlugin(),
+                        quotePlugin(),
+                        thematicBreakPlugin(),
+                        markdownShortcutPlugin(),
+                      ]}
+                      className="min-h-[calc(100vh-200px)]"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center text-gray-500">
+                  <FolderOpen className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+                  <p className="text-sm">파일을 선택하세요</p>
+                </div>
               )}
             </div>
-          </div>
+          </>
         ) : (
-          <FileUpload />
+          <div className="flex-1 overflow-auto">
+            <div className="max-w-4xl mx-auto p-8">
+              <FileUpload />
+            </div>
+          </div>
         )}
       </main>
     </div>

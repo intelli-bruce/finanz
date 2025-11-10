@@ -111,16 +111,31 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 - `POST /markdown` - 재무 데이터 쓰기 (전체 덮어쓰기)
 - `PATCH /markdown/append` - 재무 데이터에 내용 추가
 
-### 파일 관리 (Supabase Storage)
+### 파일 업로드 (Supabase Storage)
 - `POST /upload` - 파일 업로드
 - `GET /files` - 업로드된 파일 목록 조회
 - `DELETE /files/:filename` - 파일 삭제
 
+### 파일 시스템 관리 (MCP용)
+- `GET /fs/list` - 파일/디렉토리 목록 조회
+- `GET /fs/read` - 파일 읽기
+- `POST /fs/write` - 파일 쓰기
+- `DELETE /fs/delete` - 파일/디렉토리 삭제
+- `POST /fs/mkdir` - 디렉토리 생성
+
 ## MCP Tools
 
+### 기존 재무 데이터 관리
 - `read_financial_data` - 재무 데이터 읽기
 - `write_financial_data` - 재무 데이터 쓰기
 - `append_financial_data` - 재무 데이터에 내용 추가
+
+### 파일 시스템 관리
+- `list_files` - 파일 및 디렉토리 목록 조회
+- `read_file` - 특정 파일 읽기
+- `write_file` - 파일 생성 또는 덮어쓰기
+- `delete_file` - 파일 또는 디렉토리 삭제
+- `create_directory` - 디렉토리 생성
 
 ## 데이터 형식
 

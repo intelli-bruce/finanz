@@ -74,6 +74,79 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['content'],
         },
       },
+      {
+        name: 'list_files',
+        description: '지정된 디렉토리의 파일 및 폴더 목록을 조회합니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: '조회할 디렉토리 경로 (data/ 기준 상대 경로, 비어있으면 루트)',
+            },
+          },
+        },
+      },
+      {
+        name: 'read_file',
+        description: '지정된 파일의 내용을 읽습니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: '읽을 파일 경로 (data/ 기준 상대 경로)',
+            },
+          },
+          required: ['path'],
+        },
+      },
+      {
+        name: 'write_file',
+        description: '파일을 생성하거나 덮어씁니다. 필요한 경우 디렉토리도 자동 생성됩니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: '파일 경로 (data/ 기준 상대 경로)',
+            },
+            content: {
+              type: 'string',
+              description: '파일 내용',
+            },
+          },
+          required: ['path', 'content'],
+        },
+      },
+      {
+        name: 'delete_file',
+        description: '파일 또는 디렉토리를 삭제합니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: '삭제할 파일 또는 디렉토리 경로 (data/ 기준 상대 경로)',
+            },
+          },
+          required: ['path'],
+        },
+      },
+      {
+        name: 'create_directory',
+        description: '새 디렉토리를 생성합니다. 부모 디렉토리도 자동으로 생성됩니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: '생성할 디렉토리 경로 (data/ 기준 상대 경로)',
+            },
+          },
+          required: ['path'],
+        },
+      },
     ],
   };
 });
@@ -133,6 +206,103 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: '내용이 성공적으로 추가되었습니다.',
+            },
+          ],
+        };
+      }
+
+      case 'list_files': {
+        const pathParam = (args?.path as string) || '';
+        const result = await callAPI(`/fs/list?path=${encodeURIComponent(pathParam)}`);
+
+        const items = result.items.map((item: any) => {
+          const type = item.type === 'directory' ? '📁' : '📄';
+          return `${type} ${item.name} (${item.path})`;
+        }).join('\n');
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: items || '디렉토리가 비어있습니다.',
+            },
+          ],
+        };
+      }
+
+      case 'read_file': {
+        if (!args || typeof args.path !== 'string') {
+          throw new Error('path parameter is required');
+        }
+
+        const result = await callAPI(`/fs/read?path=${encodeURIComponent(args.path)}`);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: result.content,
+            },
+          ],
+        };
+      }
+
+      case 'write_file': {
+        if (!args || typeof args.path !== 'string' || typeof args.content !== 'string') {
+          throw new Error('path and content parameters are required');
+        }
+
+        await callAPI('/fs/write', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: args.path, content: args.content }),
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `파일이 성공적으로 작성되었습니다: ${args.path}`,
+            },
+          ],
+        };
+      }
+
+      case 'delete_file': {
+        if (!args || typeof args.path !== 'string') {
+          throw new Error('path parameter is required');
+        }
+
+        await callAPI(`/fs/delete?path=${encodeURIComponent(args.path)}`, {
+          method: 'DELETE',
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `삭제되었습니다: ${args.path}`,
+            },
+          ],
+        };
+      }
+
+      case 'create_directory': {
+        if (!args || typeof args.path !== 'string') {
+          throw new Error('path parameter is required');
+        }
+
+        await callAPI('/fs/mkdir', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: args.path }),
+        });
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `디렉토리가 생성되었습니다: ${args.path}`,
             },
           ],
         };

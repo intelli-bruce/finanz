@@ -13,6 +13,7 @@ const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 const DATA_FILE = path.join(__dirname, '../../data/financial.md');
 const UPLOADS_DIR = path.join(__dirname, '../../data/uploads');
+const DATA_DIR = path.join(__dirname, '../../data');
 
 // Supabase 클라이언트 설정
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -241,6 +242,177 @@ app.delete('/files/:filename', async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, message: 'File deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// ============================================
+// 파일 시스템 관리 API (MCP용)
+// ============================================
+
+// 경로 검증 헬퍼 - 경로 조작 공격 방지
+function validatePath(requestedPath: string): string {
+  const fullPath = path.join(DATA_DIR, requestedPath);
+  const normalizedPath = path.normalize(fullPath);
+
+  // data 디렉토리 밖으로 나가는지 확인
+  if (!normalizedPath.startsWith(DATA_DIR)) {
+    throw new Error('Invalid path: Access denied');
+  }
+
+  return normalizedPath;
+}
+
+// 파일/디렉토리 목록 조회
+app.get('/fs/list', async (req: Request, res: Response) => {
+  try {
+    const { path: requestedPath = '' } = req.query;
+    const fullPath = validatePath(requestedPath as string);
+
+    // 디렉토리 존재 확인
+    const stats = await fs.stat(fullPath);
+    if (!stats.isDirectory()) {
+      return res.status(400).json({ error: 'Path is not a directory' });
+    }
+
+    const entries = await fs.readdir(fullPath, { withFileTypes: true });
+
+    const items = await Promise.all(
+      entries.map(async (entry) => {
+        const itemPath = path.join(fullPath, entry.name);
+        const stats = await fs.stat(itemPath);
+        const relativePath = path.relative(DATA_DIR, itemPath);
+
+        return {
+          name: entry.name,
+          path: relativePath,
+          type: entry.isDirectory() ? 'directory' : 'file',
+          size: stats.size,
+          created: stats.birthtime,
+          modified: stats.mtime
+        };
+      })
+    );
+
+    res.json({ items });
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      res.status(404).json({ error: 'Directory not found' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// 파일 읽기
+app.get('/fs/read', async (req: Request, res: Response) => {
+  try {
+    const { path: requestedPath } = req.query;
+
+    if (!requestedPath || typeof requestedPath !== 'string') {
+      return res.status(400).json({ error: 'Path parameter is required' });
+    }
+
+    const fullPath = validatePath(requestedPath);
+    const content = await fs.readFile(fullPath, 'utf-8');
+
+    res.json({ content, path: requestedPath });
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      res.status(404).json({ error: 'File not found' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// 파일 쓰기 (생성 또는 덮어쓰기)
+app.post('/fs/write', async (req: Request, res: Response) => {
+  try {
+    const { path: requestedPath, content } = req.body;
+
+    if (!requestedPath || typeof requestedPath !== 'string') {
+      return res.status(400).json({ error: 'Path parameter is required' });
+    }
+
+    if (typeof content !== 'string') {
+      return res.status(400).json({ error: 'Content must be a string' });
+    }
+
+    const fullPath = validatePath(requestedPath);
+
+    // 디렉토리 생성 (필요한 경우)
+    await fs.mkdir(path.dirname(fullPath), { recursive: true });
+
+    // 파일 쓰기
+    await fs.writeFile(fullPath, content, 'utf-8');
+
+    res.json({
+      success: true,
+      message: 'File written successfully',
+      path: requestedPath
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 파일 삭제
+app.delete('/fs/delete', async (req: Request, res: Response) => {
+  try {
+    const { path: requestedPath } = req.query;
+
+    if (!requestedPath || typeof requestedPath !== 'string') {
+      return res.status(400).json({ error: 'Path parameter is required' });
+    }
+
+    const fullPath = validatePath(requestedPath);
+
+    // 파일인지 디렉토리인지 확인
+    const stats = await fs.stat(fullPath);
+
+    if (stats.isDirectory()) {
+      // 디렉토리 삭제 (재귀적)
+      await fs.rm(fullPath, { recursive: true, force: true });
+    } else {
+      // 파일 삭제
+      await fs.unlink(fullPath);
+    }
+
+    res.json({
+      success: true,
+      message: 'Deleted successfully',
+      path: requestedPath
+    });
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      res.status(404).json({ error: 'File or directory not found' });
+    } else {
+      res.status(500).json({ error: error.message });
+    }
+  }
+});
+
+// 디렉토리 생성
+app.post('/fs/mkdir', async (req: Request, res: Response) => {
+  try {
+    const { path: requestedPath } = req.body;
+
+    if (!requestedPath || typeof requestedPath !== 'string') {
+      return res.status(400).json({ error: 'Path parameter is required' });
+    }
+
+    const fullPath = validatePath(requestedPath);
+
+    // 디렉토리 생성 (재귀적)
+    await fs.mkdir(fullPath, { recursive: true });
+
+    res.json({
+      success: true,
+      message: 'Directory created successfully',
+      path: requestedPath
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

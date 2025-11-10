@@ -15,6 +15,8 @@
     "build:api": "npm run build --workspace=api",
     "build:web": "npm run build --workspace=web",
     "start:api": "npm run start --workspace=api",
+    "ingest:transactions": "node scripts/import-transactions.js",
+    "ingest:coupang": "node scripts/import-coupang-pdf.js",
     "clean": "rm -rf api/dist web/dist api/node_modules web/node_modules node_modules"
   },
   "engines": {

@@ -20,6 +20,41 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 const DATA_FILE = path.join(__dirname, '../../data/financial.md');
 const UPLOADS_DIR = path.join(__dirname, '../../data/uploads');
 const DATA_DIR = path.join(__dirname, '../../data');
+const TRANSACTIONS_DIR = path.join(DATA_DIR, 'transactions');
+
+type TransactionRecord = {
+  id?: string;
+  occurredAt?: {
+    iso?: string | null;
+    utc?: string | null;
+  } | null;
+  description?: string | null;
+  transactionType?: string | null;
+  institution?: string | null;
+  counterAccount?: string | null;
+  amount?: number | null;
+  balance?: number | null;
+  memo?: string | null;
+  raw?: Record<string, unknown>;
+};
+
+type TransactionFilePayload = {
+  generatedAt?: string;
+  sourceFile?: string;
+  timezone?: string;
+  account?: {
+    bank?: string | null;
+    holder?: string | null;
+    number?: string | null;
+  };
+  period?: {
+    from?: string | null;
+    to?: string | null;
+  };
+  currency?: string;
+  total?: number;
+  records: TransactionRecord[];
+};
 
 // Supabase 클라이언트 설정
 const supabaseUrl = process.env.SUPABASE_URL!;
@@ -101,6 +136,127 @@ app.patch('/markdown/append', async (req: Request, res: Response) => {
   }
 });
 
+// 거래내역 JSON 조회
+app.get('/transactions', async (req: Request, res: Response) => {
+  try {
+    const query = req.query as Record<string, string | undefined>;
+    const { data, filePath, relativePath, availableFiles } = await loadTransactionData(query.file);
+    const fromDate = parseQueryDate(query.from);
+    const toDate = parseQueryDate(query.to);
+    const typeFilter = query.type?.trim();
+    const searchText = query.q?.trim().toLowerCase();
+    const minAmount = query.minAmount ? Number(query.minAmount) : null;
+    const maxAmount = query.maxAmount ? Number(query.maxAmount) : null;
+    const parsedLimit = query.limit ? Number(query.limit) : NaN;
+    const limitNumber = Math.max(
+      1,
+      Math.min(Number.isNaN(parsedLimit) ? 200 : Math.floor(parsedLimit), 1000)
+    );
+
+    let records = [...data.records];
+
+    if (fromDate) {
+      records = records.filter((record) => {
+        const occurredAt = getRecordDate(record);
+        return occurredAt ? occurredAt >= fromDate : false;
+      });
+    }
+
+    if (toDate) {
+      records = records.filter((record) => {
+        const occurredAt = getRecordDate(record);
+        return occurredAt ? occurredAt <= toDate : false;
+      });
+    }
+
+    if (typeFilter) {
+      records = records.filter(
+        (record) => (record.transactionType || '').toLowerCase() === typeFilter.toLowerCase()
+      );
+    }
+
+    if (searchText) {
+      records = records.filter((record) => {
+        const target = [
+          record.description,
+          record.institution,
+          record.memo,
+          record.counterAccount,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return target.includes(searchText);
+      });
+    }
+
+    if (minAmount !== null && !Number.isNaN(minAmount)) {
+      records = records.filter(
+        (record) => typeof record.amount === 'number' && record.amount >= minAmount
+      );
+    }
+
+    if (maxAmount !== null && !Number.isNaN(maxAmount)) {
+      records = records.filter(
+        (record) => typeof record.amount === 'number' && record.amount <= maxAmount
+      );
+    }
+
+    const stats = records.reduce(
+      (acc, record) => {
+        const amount = typeof record.amount === 'number' ? record.amount : null;
+        if (amount !== null) {
+          if (amount >= 0) {
+            acc.inflow += amount;
+          } else {
+            acc.outflow += amount;
+          }
+        }
+
+        const typeKey = record.transactionType || '미지정';
+        acc.byType[typeKey] = (acc.byType[typeKey] || 0) + 1;
+
+        return acc;
+      },
+      {
+        inflow: 0,
+        outflow: 0,
+        byType: {} as Record<string, number>,
+      }
+    );
+
+    const limitedRecords = records.slice(0, limitNumber);
+
+    res.json({
+      source: {
+        file: relativePath,
+        generatedAt: data.generatedAt,
+        timezone: data.timezone,
+        period: data.period,
+        account: data.account,
+        totalInFile: data.records.length,
+      },
+      filters: {
+        file: query.file || null,
+        from: fromDate?.toISOString() || null,
+        to: toDate?.toISOString() || null,
+        type: typeFilter || null,
+        q: searchText || null,
+        minAmount: minAmount ?? null,
+        maxAmount: maxAmount ?? null,
+        limit: limitNumber,
+      },
+      stats,
+      matchedRecords: records.length,
+      returnedRecords: limitedRecords.length,
+      availableFiles,
+      records: limitedRecords,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // 파일명을 안전한 ASCII 문자로 변환
 function sanitizeFilename(filename: string): string {
   // 한글 및 특수문자를 안전한 형식으로 변환
@@ -111,6 +267,122 @@ function sanitizeFilename(filename: string): string {
     .replace(/\s+/g, '-') // 공백을 하이픈으로 변경
     .replace(/-+/g, '-') // 연속된 하이픈을 하나로
     .replace(/^-|-$/g, ''); // 시작/끝 하이픈 제거
+}
+
+type TransactionFileInfo = {
+  name: string;
+  relativePath: string;
+  path: string;
+  size: number;
+  updatedAt: string;
+  mtimeMs: number;
+};
+
+async function listTransactionFilesMetadata(): Promise<TransactionFileInfo[]> {
+  async function walk(dir: string, relativeBase: string): Promise<TransactionFileInfo[]> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    const results: TransactionFileInfo[] = [];
+
+    for (const entry of entries) {
+      const entryPath = path.join(dir, entry.name);
+      const relativePath = path.join(relativeBase, entry.name);
+
+      if (entry.isDirectory()) {
+        const nested = await walk(entryPath, relativePath);
+        results.push(...nested);
+        continue;
+      }
+
+      if (!entry.isFile() || !entry.name.endsWith('.json')) {
+        continue;
+      }
+
+      const stats = await fs.stat(entryPath);
+      results.push({
+        name: entry.name,
+        relativePath,
+        path: entryPath,
+        size: stats.size,
+        updatedAt: stats.mtime.toISOString(),
+        mtimeMs: stats.mtimeMs,
+      });
+    }
+
+    return results;
+  }
+
+  try {
+    const files = await walk(TRANSACTIONS_DIR, '');
+
+    return files.sort((a, b) => b.mtimeMs - a.mtimeMs);
+  } catch (error: any) {
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
+
+async function resolveTransactionFilePath(fileName?: string) {
+  await fs.mkdir(TRANSACTIONS_DIR, { recursive: true });
+
+  if (fileName) {
+    const normalized = path.normalize(fileName).replace(/^(\.\.(\/|\\|$))+/, '');
+    const explicitPath = path.join(TRANSACTIONS_DIR, normalized);
+
+    if (!explicitPath.startsWith(TRANSACTIONS_DIR)) {
+      throw new Error('허용되지 않은 파일 경로입니다.');
+    }
+
+    await fs.access(explicitPath);
+    return explicitPath;
+  }
+
+  const files = await listTransactionFilesMetadata();
+  if (!files.length) {
+    throw new Error('거래내역 JSON 파일이 없습니다. 먼저 ingest 스크립트를 실행하세요.');
+  }
+
+  return files[0].path;
+}
+
+function parseQueryDate(value?: string) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date;
+}
+
+function getRecordDate(record: TransactionRecord) {
+  const candidate = record.occurredAt?.utc || record.occurredAt?.iso;
+  if (!candidate) return null;
+  const date = new Date(candidate);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date;
+}
+
+async function loadTransactionData(fileName?: string) {
+  const filePath = await resolveTransactionFilePath(fileName);
+  const raw = await fs.readFile(filePath, 'utf-8');
+  const data = JSON.parse(raw) as TransactionFilePayload;
+  data.records = Array.isArray(data.records) ? data.records : [];
+  const files = await listTransactionFilesMetadata();
+  const relativePath = path.relative(TRANSACTIONS_DIR, filePath);
+  return {
+    filePath,
+    relativePath,
+    data,
+    availableFiles: files.map((file) => ({
+      name: file.name,
+      relativePath: file.relativePath,
+      updatedAt: file.updatedAt,
+      size: file.size,
+    })),
+  };
 }
 
 // 파일 업로드 - Supabase Storage 사용

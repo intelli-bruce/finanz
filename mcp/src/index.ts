@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-const API_URL = process.env.FINANZ_API_URL || 'http://localhost:3000';
+const API_URL = process.env.FINANZ_API_URL || 'http://localhost:3002';
 
 // API 호출 헬퍼
 async function callAPI(endpoint: string, options?: RequestInit) {
@@ -72,6 +72,47 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             },
           },
           required: ['content'],
+        },
+      },
+      {
+        name: 'list_transactions',
+        description: '거래내역 JSON을 기간, 유형, 키워드 등으로 필터링해 조회합니다.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            from: {
+              type: 'string',
+              description: '조회 시작일 (ISO8601, 예: 2025-01-01)',
+            },
+            to: {
+              type: 'string',
+              description: '조회 종료일 (ISO8601)',
+            },
+            type: {
+              type: 'string',
+              description: '거래 유형 (예: 체크카드결제, 출금 등)',
+            },
+            q: {
+              type: 'string',
+              description: '설명/가맹점/메모 텍스트 검색어',
+            },
+            minAmount: {
+              type: 'number',
+              description: '최소 거래 금액 (원)',
+            },
+            maxAmount: {
+              type: 'number',
+              description: '최대 거래 금액 (원)',
+            },
+            limit: {
+              type: 'number',
+              description: '반환할 최대 레코드 수 (기본 200, 최대 1000)',
+            },
+            file: {
+              type: 'string',
+              description: '특정 거래 JSON 파일명 (data/transactions/*.json)',
+            },
+          },
         },
       },
       {
@@ -242,6 +283,46 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: '내용이 성공적으로 추가되었습니다.',
+            },
+          ],
+        };
+      }
+
+      case 'list_transactions': {
+        const params = new URLSearchParams();
+        const maybeAppend = (key: string, value?: unknown) => {
+          if (value === undefined || value === null) return;
+          params.append(key, String(value));
+        };
+
+        maybeAppend('from', args?.from);
+        maybeAppend('to', args?.to);
+        maybeAppend('type', args?.type);
+        maybeAppend('q', args?.q);
+
+        if (typeof args?.minAmount === 'number') {
+          maybeAppend('minAmount', args.minAmount);
+        }
+
+        if (typeof args?.maxAmount === 'number') {
+          maybeAppend('maxAmount', args.maxAmount);
+        }
+
+        if (typeof args?.limit === 'number') {
+          maybeAppend('limit', args.limit);
+        }
+
+        maybeAppend('file', args?.file);
+
+        const queryString = params.toString();
+        const endpoint = `/transactions${queryString ? `?${queryString}` : ''}`;
+        const result = await callAPI(endpoint);
+
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(result, null, 2),
             },
           ],
         };

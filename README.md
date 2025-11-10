@@ -104,6 +104,24 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 
 설정 후 Claude Desktop을 재시작하면 MCP 서버가 활성화됩니다.
 
+### 5. CSV 거래내역 가져오기
+
+토스뱅크 등에서 내려받은 CSV를 `data/transactions/*.json`으로 변환해 API/LLM이 사용하도록 합니다.
+
+```bash
+# 기본 사용: data/transactions/transactions-조회기간.json 으로 저장
+npm run ingest:transactions -- /path/to/transactions.csv
+
+# 출력 경로·타임존 지정 예시 (기관별 하위 디렉토리 권장)
+npm run ingest:transactions -- /path/to/transactions.csv --out data/transactions/tossbank/2025-01-01_2025-11-10.json --tz +09:00
+
+# 쿠팡 카드 영수증 PDF → JSON
+npm run ingest:coupang -- --out data/transactions/coupang/2025-01-01_2025-11-10.json \\
+  /path/to/coupang-list-0.pdf /path/to/coupang-list-1.pdf
+```
+
+생성된 JSON은 `/transactions` API와 MCP `list_transactions` tool에서 바로 활용됩니다.
+
 ## API 엔드포인트
 
 ### 마크다운 관리
@@ -128,6 +146,9 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 - `GET /storage/download/:filename` - 파일 다운로드 및 읽기
 - `GET /storage/info/:filename` - 파일 정보 조회
 
+### 거래 내역
+- `GET /transactions` - 최신 혹은 `file`로 지정한 거래 JSON을 로드해 날짜/유형/금액/키워드로 필터링하고, 요약 통계와 함께 최대 1000건까지 반환합니다. `file`은 `data/transactions/` 기준 상대 경로(예: `tossbank/2025-01-01_2025-11-10.json`)를 받습니다. 지원 파라미터: `from`, `to`, `type`, `q`, `minAmount`, `maxAmount`, `limit`, `file`.
+
 ## MCP Tools
 
 ### 기존 재무 데이터 관리
@@ -146,6 +167,9 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 - `list_uploaded_files` - 업로드된 파일 목록 조회
 - `read_uploaded_file` - 업로드된 파일 다운로드 및 읽기
 - `get_uploaded_file_info` - 파일 메타데이터 조회
+
+### 거래 내역
+- `list_transactions` - `/transactions` API를 호출해 기간·유형·검색어·금액 필터를 적용한 거래 목록과 요약 통계를 반환합니다. `file` 파라미터는 `data/transactions/` 상대 경로를 그대로 사용하세요.
 
 ## 데이터 형식
 

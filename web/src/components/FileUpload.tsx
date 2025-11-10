@@ -4,12 +4,20 @@ import { Upload, Trash2, Download, ExternalLink, Edit2, Check, X, Tag } from 'lu
 import { Button } from '@/components/ui/button';
 import { uploadFile, getFiles, deleteFile, updateFileMetadata, type FileListItem } from '@/api/client';
 
+interface UploadProgress {
+  file: File;
+  progress: number;
+  status: 'pending' | 'uploading' | 'success' | 'error';
+  error?: string;
+}
+
 export function FileUpload() {
   const [isDragging, setIsDragging] = useState(false);
   const [editingFile, setEditingFile] = useState<string | null>(null);
   const [editedName, setEditedName] = useState('');
   const [addingTagFile, setAddingTagFile] = useState<string | null>(null);
   const [newTag, setNewTag] = useState('');
+  const [uploadQueue, setUploadQueue] = useState<UploadProgress[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
 
@@ -19,13 +27,56 @@ export function FileUpload() {
     queryFn: getFiles,
   });
 
-  // 파일 업로드
-  const uploadMutation = useMutation({
-    mutationFn: uploadFile,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['files'] });
-    },
-  });
+  // 파일 업로드 처리
+  const handleFilesUpload = async (files: File[]) => {
+    // 업로드 큐에 추가
+    const newQueue: UploadProgress[] = files.map(file => ({
+      file,
+      progress: 0,
+      status: 'pending' as const
+    }));
+
+    const startIndex = uploadQueue.length;
+    setUploadQueue(prev => [...prev, ...newQueue]);
+
+    // 각 파일을 순차적으로 업로드
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const queueIndex = startIndex + i;
+
+      try {
+        // 상태를 uploading으로 변경
+        setUploadQueue(prev => prev.map((item, idx) =>
+          idx === queueIndex ? { ...item, status: 'uploading' as const, progress: 50 } : item
+        ));
+
+        await uploadFile(file);
+
+        // 성공
+        setUploadQueue(prev => prev.map((item, idx) =>
+          idx === queueIndex ? { ...item, status: 'success' as const, progress: 100 } : item
+        ));
+      } catch (error: any) {
+        // 실패
+        setUploadQueue(prev => prev.map((item, idx) =>
+          idx === queueIndex ? {
+            ...item,
+            status: 'error' as const,
+            progress: 0,
+            error: error.message
+          } : item
+        ));
+      }
+    }
+
+    // 모든 업로드 완료 후 파일 목록 갱신
+    queryClient.invalidateQueries({ queryKey: ['files'] });
+
+    // 3초 후 성공한 항목 제거
+    setTimeout(() => {
+      setUploadQueue(prev => prev.filter(item => item.status !== 'success'));
+    }, 3000);
+  };
 
   // 파일 메타데이터 업데이트
   const updateMutation = useMutation({
@@ -49,10 +100,6 @@ export function FileUpload() {
     },
   });
 
-  const handleFileSelect = (file: File) => {
-    uploadMutation.mutate(file);
-  };
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -67,16 +114,18 @@ export function FileUpload() {
     e.preventDefault();
     setIsDragging(false);
 
-    const file = e.dataTransfer.files[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      handleFilesUpload(files);
     }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleFileSelect(file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFilesUpload(Array.from(files));
+      // input 초기화
+      e.target.value = '';
     }
   };
 
@@ -185,17 +234,73 @@ export function FileUpload() {
         <input
           ref={fileInputRef}
           type="file"
+          multiple
           onChange={handleInputChange}
           className="hidden"
         />
         <Button
           variant="outline"
           onClick={() => fileInputRef.current?.click()}
-          disabled={uploadMutation.isPending}
+          disabled={uploadQueue.some(item => item.status === 'uploading')}
         >
-          {uploadMutation.isPending ? '업로드 중...' : '파일 선택'}
+          파일 선택
         </Button>
       </div>
+
+      {/* 업로드 진행 상태 */}
+      {uploadQueue.length > 0 && (
+        <div className="border rounded-lg divide-y bg-white">
+          <div className="p-4 bg-gray-50">
+            <h3 className="text-sm font-semibold text-gray-900">
+              업로드 진행 중 ({uploadQueue.filter(item => item.status !== 'success').length}개)
+            </h3>
+          </div>
+          <div className="divide-y">
+            {uploadQueue.map((item, index) => (
+              <div key={index} className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-sm font-medium text-gray-900 truncate">
+                      {item.file.name}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      ({(item.file.size / 1024).toFixed(1)} KB)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {item.status === 'pending' && (
+                      <span className="text-xs text-gray-500">대기 중...</span>
+                    )}
+                    {item.status === 'uploading' && (
+                      <span className="text-xs text-blue-600">업로드 중...</span>
+                    )}
+                    {item.status === 'success' && (
+                      <span className="text-xs text-green-600">완료</span>
+                    )}
+                    {item.status === 'error' && (
+                      <span className="text-xs text-red-600">실패</span>
+                    )}
+                  </div>
+                </div>
+                {/* 진행바 */}
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${
+                      item.status === 'success' ? 'bg-green-600' :
+                      item.status === 'error' ? 'bg-red-600' :
+                      'bg-blue-600'
+                    }`}
+                    style={{ width: `${item.progress}%` }}
+                  />
+                </div>
+                {item.error && (
+                  <p className="text-xs text-red-600 mt-1">{item.error}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 파일 목록 */}
       {files.length > 0 && (

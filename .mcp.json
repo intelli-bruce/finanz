@@ -1,0 +1,13 @@
+  {
+    "mcpServers": {
+      "finanz": {
+        "command": "node",
+        "args": [
+          "/Users/brucechoe/Projects/finanz/mcp/dist/index.js"
+        ],
+        "env": {
+          "FINANZ_API_URL": "http://localhost:3002"
+        }
+      }
+    }
+  }

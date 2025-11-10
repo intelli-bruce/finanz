@@ -1,0 +1,21 @@
+{
+  "name": "finanz-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for financial data management",
+  "type": "module",
+  "bin": {
+    "finanz-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -133,23 +133,32 @@ function parseReceipt(chunk, pdfPath, pageOffset, timezone) {
 
   const idBase = orderNumber || approvalNumber || `unknown-${Date.now()}`;
 
+  const amount = totalAmount != null ? -Math.abs(totalAmount) : null;
   return {
     id: `coupang-${idBase}`,
-    source: 'coupang',
-    orderNumber: orderNumber || null,
-    approvalNumber: approvalNumber || null,
     occurredAt,
-    productName: productName || null,
-    vendor: {
-      name: vendorName || '쿠팡',
-      businessNumber: vendorBizRaw || null,
+    description: productName || vendorName || '쿠팡 주문',
+    transactionType: 'purchase',
+    institution: '쿠팡',
+    counterAccount: vendorName || '쿠팡',
+    amount,
+    balance: null,
+    memo: null,
+    metadata: {
+      productName: productName || null,
+      vendorName: vendorName || null,
+      vendorBusinessNumber: vendorBizRaw || null,
+      orderNumber: orderNumber || null,
+      approvalNumber: approvalNumber || null,
+      pdf: {
+        file: path.relative(process.cwd(), pdfPath),
+        page: pageOffset,
+      },
+      amountKRW: totalAmount,
     },
-    amountKRW: totalAmount,
-    pdf: {
-      file: path.relative(process.cwd(), pdfPath),
-      page: pageOffset,
+    raw: {
+      text: section,
     },
-    rawText: section,
   };
 }
 
@@ -183,7 +192,7 @@ function summarize(records) {
 
   const from = dates.length ? new Date(Math.min(...dates)).toISOString() : null;
   const to = dates.length ? new Date(Math.max(...dates)).toISOString() : null;
-  const totalAmount = records.reduce((sum, record) => sum + (record.amountKRW || 0), 0);
+  const totalAmount = records.reduce((sum, record) => sum + (record.amount || 0), 0);
 
   return {
     period: {
@@ -207,11 +216,16 @@ function main() {
   const summary = summarize(allRecords);
   const payload = {
     generatedAt: new Date().toISOString(),
-    sourceFiles: pdfFiles,
+    sourceFile: pdfFiles[0] || '',
     timezone,
+    account: { bank: '쿠팡', holder: '', number: '' },
     period: summary.period,
     currency: 'KRW',
-    total: allRecords.length,
+    summary: {
+      totalRecords: allRecords.length,
+      stats: summary.stats,
+      sourceFiles: pdfFiles,
+    },
     records: allRecords,
   };
 

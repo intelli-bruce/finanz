@@ -160,6 +160,8 @@ type TransactionRecord = {
 
 `scripts/normalize-naverpay.js` 는 기존 네이버페이 JSON을 위 스키마에 맞게 변환하는 도구입니다. 새로운 소스가 추가될 경우 동일 스키마만 지켜도 `/transactions` API가 그대로 동작합니다.
 
+📄 **자금 흐름 구조/기능 요구사항**은 `docs/financial-flow-requirements.md`에서 확인할 수 있습니다. 9가지 핵심 기능(자금 흐름 추적, 채널 객체화, 중복 감지, 시각화, 인컴 소스·시뮬레이션, 투자 추적, LLM 조언 등)에 필요한 구조와 모듈 요구사항을 정리해 두었으니, 기능 개발 전에 반드시 참고하세요.
+
 ## API 엔드포인트
 
 ### 마크다운 관리

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://finanz.dev/schemas/transaction-file.schema.json",
+  "title": "TransactionFile",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "sourceFile",
+    "timezone",
+    "account",
+    "period",
+    "records"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string" },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "sourceFile": { "type": "string" },
+    "timezone": { "type": "string", "pattern": "^[+-][0-9]{2}:[0-9]{2}$" },
+    "currency": { "type": "string" },
+    "account": {
+      "type": "object",
+      "required": [ "bank", "holder" ],
+      "properties": {
+        "bank": { "type": "string" },
+        "holder": { "type": "string" },
+        "number": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "channelType": {
+          "type": "string",
+          "enum": [ "bank", "card", "wallet", "investment", "other" ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "period": {
+      "type": "object",
+      "required": [ "from", "to" ],
+      "properties": {
+        "from": { "type": [ "string", "null" ] },
+        "to": { "type": [ "string", "null" ] }
+      },
+      "additionalProperties": false
+    },
+    "summary": { "type": "object" },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/TransactionRecord" }
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "DateTimePair": {
+      "type": "object",
+      "required": [ "iso", "utc" ],
+      "properties": {
+        "iso": { "type": "string" },
+        "utc": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "TransactionRecord": {
+      "type": "object",
+      "required": [ "id", "description", "transactionType", "raw" ],
+      "properties": {
+        "id": { "type": "string" },
+        "occurredAt": { "anyOf": [ { "$ref": "#/definitions/DateTimePair" }, { "type": "null" } ] },
+        "confirmedAt": { "anyOf": [ { "$ref": "#/definitions/DateTimePair" }, { "type": "null" } ] },
+        "description": { "type": "string" },
+        "transactionType": { "type": "string" },
+        "institution": { "type": "string" },
+        "counterAccount": { "type": "string" },
+        "amount": { "type": [ "number", "null" ] },
+        "balance": { "type": [ "number", "null" ] },
+        "memo": { "type": "string" },
+        "origin": { "type": "string" },
+        "matchId": { "type": "string" },
+        "category": { "type": "string" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "metadata": { "type": "object" },
+        "raw": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}

@@ -13,4 +13,4 @@ https://pay.naver.com/paymoney/history
 - 기간별 조회 가능
 
 ## 관련 파일
-- `transactions/naverpay_2025.json` - 2025년 거래내역 데이터
+- `transactions/naverpay/2025-01-11_2025-11-10.json` - 2025년 거래내역 데이터

@@ -75,6 +75,11 @@ A machine-readable JSON Schema is provided at `schemas/transaction-file.schema.j
 - `schemaVersion` follows SemVer. Breaking changes bump major version and require migration instructions.
 - Each transaction file should include `schemaVersion` to ensure MCP/API consumers validate correctly.
 
+## 7. Markdown vs Database
+- Markdown 문서는 LLM 친화적 요약·분석 용도로 유지하되, 모든 정량 데이터는 DB에 저장한다.
+- 리포트/요약(MD)은 DB에서 자동 생성해 일관성을 확보한다.
+- LLM은 MD로 맥락을 파악하고, 상세 수치는 DB 기반 API를 호출해 최신 값을 확인한다.
+
 ## 7. TODO / Extensions
 1. Finalize category taxonomy (e.g., `income.salary`, `expense.utilities`, `asset.transfer`).
 2. Define `metadata` sub-structures for 카드/투자/세금 케이스.

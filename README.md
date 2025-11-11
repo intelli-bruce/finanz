@@ -122,6 +122,44 @@ npm run ingest:coupang -- --out data/transactions/coupang/2025-01-01_2025-11-10.
 
 생성된 JSON은 `/transactions` API와 MCP `list_transactions` tool에서 바로 활용됩니다.
 
+### Transaction JSON Schema
+
+모든 `data/transactions/**` JSON은 다음 공통 스키마를 따릅니다.
+
+```ts
+type TransactionFile = {
+  generatedAt: string;
+  sourceFile: string;
+  timezone: string;
+  account: {
+    bank: string;
+    holder: string;
+    number?: string;
+    email?: string;
+  };
+  period: { from: string | null; to: string | null };
+  summary?: Record<string, unknown>;
+  records: TransactionRecord[];
+};
+
+type TransactionRecord = {
+  id: string;
+  occurredAt: { iso: string; utc: string } | null;
+  confirmedAt?: { iso: string; utc: string } | null;
+  description: string;
+  transactionType: string;
+  institution?: string;
+  counterAccount?: string;
+  amount: number | null;
+  balance: number | null;
+  memo?: string;
+  metadata?: Record<string, unknown>;
+  raw: Record<string, string | number>;
+};
+```
+
+`scripts/normalize-naverpay.js` 는 기존 네이버페이 JSON을 위 스키마에 맞게 변환하는 도구입니다. 새로운 소스가 추가될 경우 동일 스키마만 지켜도 `/transactions` API가 그대로 동작합니다.
+
 ## API 엔드포인트
 
 ### 마크다운 관리

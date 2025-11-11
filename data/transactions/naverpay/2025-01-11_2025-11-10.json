@@ -1,149 +1,448 @@
 {
-  "source": "네이버페이 (토스 머니카드 연동)",
-  "period": "2025-01-11 ~ 2025-11-10",
-  "total_records": 17,
-  "transactions": [
-    {
-      "date": "2025-11-10",
-      "time": "08:50",
-      "description": "LG 퓨리케어 자연기화 가습...",
-      "type": "결제",
-      "amount": -7522,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-11-10",
-      "time": "08:49",
-      "description": "LG 퓨리케어 자연기화 가습...",
-      "type": "결제 취소",
-      "amount": 7522,
-      "note": "네이버페이 결제 취소"
-    },
-    {
-      "date": "2025-11-10",
-      "time": "08:49",
-      "description": "LG 퓨리케어 자연기화 가습...",
-      "type": "결제",
-      "amount": -7522,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-11-07",
-      "time": "13:21",
-      "description": "메가엠지씨커피 하남D",
-      "type": "결제",
-      "amount": -12478,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-11-07",
-      "time": "13:21",
-      "description": "토스뱅크(100*****5209)",
-      "type": "충전",
-      "amount": 20000,
-      "note": "토스머니카드 충전"
-    },
-    {
-      "date": "2025-04-06",
-      "time": "07:11",
-      "description": "내츄럴 커버 옴므쿠션 (리필)",
-      "type": "결제",
-      "amount": -1177,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-03-18",
-      "time": "12:12",
-      "description": "이소틴 정",
-      "type": "결제",
-      "amount": -67083,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-03-18",
-      "time": "12:12",
-      "description": "토스뱅크(100*****5209)",
-      "type": "충전",
-      "amount": 60000,
-      "note": "토스머니카드 충전"
-    },
-    {
-      "date": "2025-02-08",
-      "time": "09:39",
-      "description": "베스트 [Bigno] 외 999",
-      "type": "결제",
-      "amount": -52740,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-02-08",
-      "time": "09:39",
-      "description": "토스뱅크(100*****5209)",
-      "type": "충전",
-      "amount": 10000,
-      "note": "토스머니카드 충전"
-    },
-    {
-      "date": "2025-02-07",
-      "time": "13:54",
-      "description": "베스트 [Bigno] 외 999",
-      "type": "결제 취소",
-      "amount": 48640,
-      "note": "네이버페이 결제 취소"
-    },
-    {
-      "date": "2025-02-06",
-      "time": "17:41",
-      "description": "베스트 [Bigno] 외 999",
-      "type": "결제",
-      "amount": -48640,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-02-06",
-      "time": "17:41",
-      "description": "토스뱅크(100*****5209)",
-      "type": "충전",
-      "amount": 50000,
-      "note": "토스머니카드 충전"
-    },
-    {
-      "date": "2025-01-15",
-      "time": "08:47",
-      "description": "카멜마운트 PMA2X 초 고중량 프리미엄 싱글 모니터암 외 1",
-      "type": "결제",
-      "amount": -118000,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-01-15",
-      "time": "08:47",
-      "description": "토스뱅크(100*****5209)",
-      "type": "충전",
-      "amount": 110000,
-      "note": "토스머니카드 충전"
-    },
-    {
-      "date": "2025-01-11",
-      "time": "17:23",
-      "description": "교촌옥수수순살 외 1개",
-      "type": "결제",
-      "amount": -21000,
-      "note": "네이버페이 결제"
-    },
-    {
-      "date": "2025-01-11",
-      "time": "17:23",
-      "description": "토스뱅크(100*****5209)",
-      "type": "충전",
-      "amount": 30000,
-      "note": "토스머니카드 충전"
-    }
-  ],
+  "generatedAt": "2025-11-11T10:27:40.722Z",
+  "sourceFile": "네이버페이 (토스 머니카드 연동)",
+  "timezone": "+09:00",
+  "account": {
+    "bank": "네이버페이",
+    "holder": "",
+    "number": "",
+    "email": "whdtmek@gmail.com"
+  },
+  "period": {
+    "from": "2025-01-11",
+    "to": "2025-11-10"
+  },
   "summary": {
     "total_charges": 280000,
     "total_payments": -328640,
     "total_refunds": 56162,
     "net_amount": 7522
-  }
+  },
+  "records": [
+    {
+      "id": "naverpay-1",
+      "occurredAt": {
+        "iso": "2025-11-10T08:50:00+09:00",
+        "utc": "2025-11-09T23:50:00.000Z"
+      },
+      "description": "LG 퓨리케어 자연기화 가습...",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "LG 퓨리케어 자연기화 가습...",
+      "amount": -7522,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-11-10",
+        "time": "08:50",
+        "description": "LG 퓨리케어 자연기화 가습...",
+        "type": "결제",
+        "amount": -7522,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-2",
+      "occurredAt": {
+        "iso": "2025-11-10T08:49:00+09:00",
+        "utc": "2025-11-09T23:49:00.000Z"
+      },
+      "description": "LG 퓨리케어 자연기화 가습...",
+      "transactionType": "결제 취소",
+      "institution": "네이버페이",
+      "counterAccount": "LG 퓨리케어 자연기화 가습...",
+      "amount": 7522,
+      "balance": null,
+      "memo": "네이버페이 결제 취소",
+      "metadata": {
+        "note": "네이버페이 결제 취소"
+      },
+      "raw": {
+        "date": "2025-11-10",
+        "time": "08:49",
+        "description": "LG 퓨리케어 자연기화 가습...",
+        "type": "결제 취소",
+        "amount": 7522,
+        "note": "네이버페이 결제 취소"
+      }
+    },
+    {
+      "id": "naverpay-3",
+      "occurredAt": {
+        "iso": "2025-11-10T08:49:00+09:00",
+        "utc": "2025-11-09T23:49:00.000Z"
+      },
+      "description": "LG 퓨리케어 자연기화 가습...",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "LG 퓨리케어 자연기화 가습...",
+      "amount": -7522,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-11-10",
+        "time": "08:49",
+        "description": "LG 퓨리케어 자연기화 가습...",
+        "type": "결제",
+        "amount": -7522,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-4",
+      "occurredAt": {
+        "iso": "2025-11-07T13:21:00+09:00",
+        "utc": "2025-11-07T04:21:00.000Z"
+      },
+      "description": "메가엠지씨커피 하남D",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "메가엠지씨커피 하남D",
+      "amount": -12478,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-11-07",
+        "time": "13:21",
+        "description": "메가엠지씨커피 하남D",
+        "type": "결제",
+        "amount": -12478,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-5",
+      "occurredAt": {
+        "iso": "2025-11-07T13:21:00+09:00",
+        "utc": "2025-11-07T04:21:00.000Z"
+      },
+      "description": "토스뱅크(100*****5209)",
+      "transactionType": "충전",
+      "institution": "네이버페이",
+      "counterAccount": "토스뱅크(100*****5209)",
+      "amount": 20000,
+      "balance": null,
+      "memo": "토스머니카드 충전",
+      "metadata": {
+        "note": "토스머니카드 충전"
+      },
+      "raw": {
+        "date": "2025-11-07",
+        "time": "13:21",
+        "description": "토스뱅크(100*****5209)",
+        "type": "충전",
+        "amount": 20000,
+        "note": "토스머니카드 충전"
+      }
+    },
+    {
+      "id": "naverpay-6",
+      "occurredAt": {
+        "iso": "2025-04-06T07:11:00+09:00",
+        "utc": "2025-04-05T22:11:00.000Z"
+      },
+      "description": "내츄럴 커버 옴므쿠션 (리필)",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "내츄럴 커버 옴므쿠션 (리필)",
+      "amount": -1177,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-04-06",
+        "time": "07:11",
+        "description": "내츄럴 커버 옴므쿠션 (리필)",
+        "type": "결제",
+        "amount": -1177,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-7",
+      "occurredAt": {
+        "iso": "2025-03-18T12:12:00+09:00",
+        "utc": "2025-03-18T03:12:00.000Z"
+      },
+      "description": "이소틴 정",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "이소틴 정",
+      "amount": -67083,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-03-18",
+        "time": "12:12",
+        "description": "이소틴 정",
+        "type": "결제",
+        "amount": -67083,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-8",
+      "occurredAt": {
+        "iso": "2025-03-18T12:12:00+09:00",
+        "utc": "2025-03-18T03:12:00.000Z"
+      },
+      "description": "토스뱅크(100*****5209)",
+      "transactionType": "충전",
+      "institution": "네이버페이",
+      "counterAccount": "토스뱅크(100*****5209)",
+      "amount": 60000,
+      "balance": null,
+      "memo": "토스머니카드 충전",
+      "metadata": {
+        "note": "토스머니카드 충전"
+      },
+      "raw": {
+        "date": "2025-03-18",
+        "time": "12:12",
+        "description": "토스뱅크(100*****5209)",
+        "type": "충전",
+        "amount": 60000,
+        "note": "토스머니카드 충전"
+      }
+    },
+    {
+      "id": "naverpay-9",
+      "occurredAt": {
+        "iso": "2025-02-08T09:39:00+09:00",
+        "utc": "2025-02-08T00:39:00.000Z"
+      },
+      "description": "베스트 [Bigno] 외 999",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "베스트 [Bigno] 외 999",
+      "amount": -52740,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-02-08",
+        "time": "09:39",
+        "description": "베스트 [Bigno] 외 999",
+        "type": "결제",
+        "amount": -52740,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-10",
+      "occurredAt": {
+        "iso": "2025-02-08T09:39:00+09:00",
+        "utc": "2025-02-08T00:39:00.000Z"
+      },
+      "description": "토스뱅크(100*****5209)",
+      "transactionType": "충전",
+      "institution": "네이버페이",
+      "counterAccount": "토스뱅크(100*****5209)",
+      "amount": 10000,
+      "balance": null,
+      "memo": "토스머니카드 충전",
+      "metadata": {
+        "note": "토스머니카드 충전"
+      },
+      "raw": {
+        "date": "2025-02-08",
+        "time": "09:39",
+        "description": "토스뱅크(100*****5209)",
+        "type": "충전",
+        "amount": 10000,
+        "note": "토스머니카드 충전"
+      }
+    },
+    {
+      "id": "naverpay-11",
+      "occurredAt": {
+        "iso": "2025-02-07T13:54:00+09:00",
+        "utc": "2025-02-07T04:54:00.000Z"
+      },
+      "description": "베스트 [Bigno] 외 999",
+      "transactionType": "결제 취소",
+      "institution": "네이버페이",
+      "counterAccount": "베스트 [Bigno] 외 999",
+      "amount": 48640,
+      "balance": null,
+      "memo": "네이버페이 결제 취소",
+      "metadata": {
+        "note": "네이버페이 결제 취소"
+      },
+      "raw": {
+        "date": "2025-02-07",
+        "time": "13:54",
+        "description": "베스트 [Bigno] 외 999",
+        "type": "결제 취소",
+        "amount": 48640,
+        "note": "네이버페이 결제 취소"
+      }
+    },
+    {
+      "id": "naverpay-12",
+      "occurredAt": {
+        "iso": "2025-02-06T17:41:00+09:00",
+        "utc": "2025-02-06T08:41:00.000Z"
+      },
+      "description": "베스트 [Bigno] 외 999",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "베스트 [Bigno] 외 999",
+      "amount": -48640,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-02-06",
+        "time": "17:41",
+        "description": "베스트 [Bigno] 외 999",
+        "type": "결제",
+        "amount": -48640,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-13",
+      "occurredAt": {
+        "iso": "2025-02-06T17:41:00+09:00",
+        "utc": "2025-02-06T08:41:00.000Z"
+      },
+      "description": "토스뱅크(100*****5209)",
+      "transactionType": "충전",
+      "institution": "네이버페이",
+      "counterAccount": "토스뱅크(100*****5209)",
+      "amount": 50000,
+      "balance": null,
+      "memo": "토스머니카드 충전",
+      "metadata": {
+        "note": "토스머니카드 충전"
+      },
+      "raw": {
+        "date": "2025-02-06",
+        "time": "17:41",
+        "description": "토스뱅크(100*****5209)",
+        "type": "충전",
+        "amount": 50000,
+        "note": "토스머니카드 충전"
+      }
+    },
+    {
+      "id": "naverpay-14",
+      "occurredAt": {
+        "iso": "2025-01-15T08:47:00+09:00",
+        "utc": "2025-01-14T23:47:00.000Z"
+      },
+      "description": "카멜마운트 PMA2X 초 고중량 프리미엄 싱글 모니터암 외 1",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "카멜마운트 PMA2X 초 고중량 프리미엄 싱글 모니터암 외 1",
+      "amount": -118000,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-01-15",
+        "time": "08:47",
+        "description": "카멜마운트 PMA2X 초 고중량 프리미엄 싱글 모니터암 외 1",
+        "type": "결제",
+        "amount": -118000,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-15",
+      "occurredAt": {
+        "iso": "2025-01-15T08:47:00+09:00",
+        "utc": "2025-01-14T23:47:00.000Z"
+      },
+      "description": "토스뱅크(100*****5209)",
+      "transactionType": "충전",
+      "institution": "네이버페이",
+      "counterAccount": "토스뱅크(100*****5209)",
+      "amount": 110000,
+      "balance": null,
+      "memo": "토스머니카드 충전",
+      "metadata": {
+        "note": "토스머니카드 충전"
+      },
+      "raw": {
+        "date": "2025-01-15",
+        "time": "08:47",
+        "description": "토스뱅크(100*****5209)",
+        "type": "충전",
+        "amount": 110000,
+        "note": "토스머니카드 충전"
+      }
+    },
+    {
+      "id": "naverpay-16",
+      "occurredAt": {
+        "iso": "2025-01-11T17:23:00+09:00",
+        "utc": "2025-01-11T08:23:00.000Z"
+      },
+      "description": "교촌옥수수순살 외 1개",
+      "transactionType": "결제",
+      "institution": "네이버페이",
+      "counterAccount": "교촌옥수수순살 외 1개",
+      "amount": -21000,
+      "balance": null,
+      "memo": "네이버페이 결제",
+      "metadata": {
+        "note": "네이버페이 결제"
+      },
+      "raw": {
+        "date": "2025-01-11",
+        "time": "17:23",
+        "description": "교촌옥수수순살 외 1개",
+        "type": "결제",
+        "amount": -21000,
+        "note": "네이버페이 결제"
+      }
+    },
+    {
+      "id": "naverpay-17",
+      "occurredAt": {
+        "iso": "2025-01-11T17:23:00+09:00",
+        "utc": "2025-01-11T08:23:00.000Z"
+      },
+      "description": "토스뱅크(100*****5209)",
+      "transactionType": "충전",
+      "institution": "네이버페이",
+      "counterAccount": "토스뱅크(100*****5209)",
+      "amount": 30000,
+      "balance": null,
+      "memo": "토스머니카드 충전",
+      "metadata": {
+        "note": "토스머니카드 충전"
+      },
+      "raw": {
+        "date": "2025-01-11",
+        "time": "17:23",
+        "description": "토스뱅크(100*****5209)",
+        "type": "충전",
+        "amount": 30000,
+        "note": "토스머니카드 충전"
+      }
+    }
+  ]
 }

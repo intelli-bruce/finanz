@@ -823,3 +823,29 @@ CMS출금 합계:          1,182,500원
 
 *분석 기간: 2025.01.01 ~ 2025.10.31*  
 *업데이트: 2025-11-10*
+
+
+
+---
+
+### 💳 거래내역서 관리 (Transaction Statement Management)
+
+각 금융 채널의 거래내역서 다운로드 및 조회 방법을 정리했습니다.
+
+| 금융채널 | 접근 방법 | 상세 정보 파일 | 비고 |
+|---------|-----------|--------------|------|
+| 🏦 **신한카드** | 모바일 웹 | [links/shinhan_card_transactions.md](links/shinhan_card_transactions.md) | 로그인 필요, 엑셀/PDF 다운 |
+| 💳 **네이버페이** | 웹 조회 | [links/naverpay_history.md](links/naverpay_history.md) | 토스 머니카드 연동 |
+| 💛 **카카오페이** | 챗봇 발급 | [links/kakaopay_statement.md](links/kakaopay_statement.md) | 카카오톡 챗봇 이용 |
+
+#### 빠른 링크
+- **신한카드 거래내역**: https://www.shinhancard.com/mob/MOBFM210N/MOBFM210R01.shc?crustMenuId=ms43
+- **네이버페이 거래내역**: https://pay.naver.com/paymoney/history
+- **카카오페이 거래내역**: 카카오톡 > 카카오페이 > 챗봇 > "거래내역서" 요청
+
+#### 2025년 거래내역 데이터
+- 📊 [네이버페이 2025년](transactions/naverpay_2025.json) - 총 17건, 순 지출 7,522원
+
+---
+
+*거래내역서 링크 추가: 2025-11-11*

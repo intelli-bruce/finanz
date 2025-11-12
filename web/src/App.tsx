@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { FileUpload } from '@/components/FileUpload';
 import { FileExplorer } from '@/components/FileExplorer';
 import { ExcelDecryptor } from '@/components/ExcelDecryptor';
+import { CashflowView } from '@/components/CashflowView';
+import { BalanceSheetView } from '@/components/BalanceSheetView';
 import { DockMenu } from '@/components/DockMenu';
 import type { ViewType } from '@/types/views';
 
@@ -26,6 +28,14 @@ const viewMeta: Record<ViewType, { label: string; description: string }> = {
   decrypt: {
     label: 'Decrypt',
     description: '암호화 Excel 해제 도구',
+  },
+  cashflow: {
+    label: 'Cashflow',
+    description: '월별 현금흐름표 & 요약',
+  },
+  balance: {
+    label: 'Balance Sheet',
+    description: '월별 대차대조표 요약',
   },
 };
 
@@ -105,7 +115,8 @@ function FinanzEditor() {
     };
   }, []);
 
-  const shouldShowExplorer = isExplorerOpen && (isDocumentsHovering || isExplorerHovering);
+  const shouldShowExplorer =
+    activeView === 'documents' && isExplorerOpen && (isDocumentsHovering || isExplorerHovering);
   const explorerBottomOffset = dockHeight ? dockHeight + 24 + 5 : 140;
 
   return (
@@ -181,7 +192,7 @@ function FinanzEditor() {
                       extensions={[
                         markdown({ base: markdownLanguage, codeLanguages: languages })
                       ]}
-                      onChange={(value) => setContent(value)}
+                      onChange={(value: string) => setContent(value)}
                       theme="light"
                       basicSetup={{
                         lineNumbers: true,
@@ -252,11 +263,19 @@ function FinanzEditor() {
               <FileUpload />
             </div>
           </div>
-        ) : (
+        ) : activeView === 'decrypt' ? (
           <div className="flex-1 overflow-auto">
             <div className="p-8">
               <ExcelDecryptor />
             </div>
+          </div>
+        ) : activeView === 'cashflow' ? (
+          <div className="flex-1 overflow-auto">
+            <CashflowView />
+          </div>
+        ) : (
+          <div className="flex-1 overflow-auto">
+            <BalanceSheetView />
           </div>
         )}
       </main>

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef } from 'react';
-import { FolderOpen, Unlock, Upload } from 'lucide-react';
+import { BarChart3, FolderOpen, Scale, Unlock, Upload } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ViewType } from '@/types/views';
 
@@ -35,6 +35,18 @@ const dockItems: DockItem[] = [
     label: 'Decrypt',
     icon: Unlock,
     gradient: 'from-emerald-500 via-teal-500 to-emerald-400',
+  },
+  {
+    key: 'cashflow',
+    label: 'Cashflow',
+    icon: BarChart3,
+    gradient: 'from-amber-500 via-orange-500 to-rose-500',
+  },
+  {
+    key: 'balance',
+    label: 'Balance',
+    icon: Scale,
+    gradient: 'from-violet-500 via-purple-500 to-indigo-500',
   },
 ];
 

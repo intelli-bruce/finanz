@@ -1,2 +1,1 @@
-export type ViewType = 'documents' | 'uploads' | 'decrypt';
-
+export type ViewType = 'documents' | 'uploads' | 'decrypt' | 'cashflow' | 'balance';

@@ -136,4 +136,62 @@ export const createDirectory = async (path: string): Promise<void> => {
   await apiClient.post('/fs/mkdir', { path });
 };
 
+// ============================================
+// 보고서 API
+// ============================================
+
+export interface MonthlyCashflowRow {
+  period_start: string;
+  period_end: string;
+  operating_cash_flow: number;
+  investing_cash_flow: number;
+  financing_cash_flow: number;
+  total_inflows: number;
+  total_outflows: number;
+  net_cash_flow: number;
+}
+
+export interface CashflowBreakdownEntry {
+  period_start: string;
+  id: string;
+  channel_name: string;
+  description: string;
+  amount: number;
+  occurred_at: string;
+}
+
+export interface MonthlyCashflowResponse {
+  rows: MonthlyCashflowRow[];
+  breakdown: Record<string, CashflowBreakdownEntry[]>;
+}
+
+export const getMonthlyCashflow = async (): Promise<MonthlyCashflowResponse> => {
+  const response = await apiClient.get<MonthlyCashflowResponse>('/reports/cashflow/monthly');
+  return response.data;
+};
+
+export interface BalanceSheetMonthlySummaryRow {
+  period_start: string;
+  period_end: string;
+  assets: number;
+  liabilities: number;
+  equity: number;
+}
+
+export interface BalanceSheetMonthlyChannelRow {
+  period_start: string;
+  period_end: string;
+  channel_name: string;
+  reporting_role: string;
+  closing_balance: number;
+}
+
+export const getMonthlyBalanceSheet = async () => {
+  const response = await apiClient.get<{
+    summary: BalanceSheetMonthlySummaryRow[];
+    channels: BalanceSheetMonthlyChannelRow[];
+  }>('/reports/balance-sheet/monthly');
+  return response.data;
+};
+
 export default apiClient;

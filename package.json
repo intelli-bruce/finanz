@@ -17,6 +17,7 @@
     "start:api": "npm run start --workspace=api",
     "ingest:transactions": "node scripts/import-transactions.js",
     "ingest:coupang": "node scripts/import-coupang-pdf.js",
+    "test:reports": "tsx scripts/tests/verify-reporting.ts",
     "clean": "rm -rf api/dist web/dist api/node_modules web/node_modules node_modules"
   },
   "engines": {

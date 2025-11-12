@@ -44,6 +44,9 @@ API 서버 실행 전에 환경 변수를 설정해야 합니다.
 SUPABASE_URL=your-supabase-url
 SUPABASE_ANON_KEY=your-supabase-anon-key
 PORT=3002
+# Postgres 보고용 CLI 경로 (선택)
+# docker 컨테이너를 사용 중이면 기본값을 그대로 둬도 됩니다.
+# POSTGRES_PSQL="docker exec -i finanz-postgres psql -U postgres -d postgres"
 ```
 
 ## 사용 방법
@@ -165,6 +168,14 @@ type TransactionRecord = {
 📐 **JSON Schema**: `schemas/transaction-file.schema.json`에 머신 검증용 스키마를 제공하므로, 신규 거래 JSON을 추가하기 전 `npx ajv validate -s schemas/transaction-file.schema.json -d data/transactions/<file>.json` 등으로 확인하세요.
 
 🗄️ **Database Schema**: 장기적으로는 PostgreSQL이 거래의 단일 소스가 됩니다. 초안 DDL과 테이블 관계는 `docs/db-schema.md`를 참고하세요.
+
+📊 **Financial Reporting Views**: `scripts/sql/reporting_financial_statements.sql`을 적용하면 `reporting` 스키마에 월별/분기별/반기별 대차대조표와 월별 현금흐름표 뷰가 생성됩니다. 실행 순서와 커스터마이징 방법은 `docs/financial-reporting.md`를 참고하세요. 웹 UI 하단 Dock의 **Cashflow** / **Balance Sheet** 탭이 각각 `/reports/cashflow/monthly`, `/reports/balance-sheet/monthly` API를 호출해 데이터를 시각화합니다.
+
+🧪 **보고 뷰 검증**: `npm run test:reports` 명령은 Postgres reporting 뷰를 조회해 아래를 자동 검증합니다.
+  1. 모든 기간에 대해 `자산 - 부채 = 자기자본`
+  2. 각 월의 순자산 변동 = 해당 월 `net_cash_flow`
+  3. 전체 기간 누적 순현금흐름 = 최초 대비 최신 순자산 변동
+  실패 시 에러 메시지와 함께 어떤 월/항목이 어긋나는지 표시하므로, ingest 파이프라인이나 채널 메타데이터를 수정한 뒤 꼭 실행하세요.
 
 ## API 엔드포인트
 

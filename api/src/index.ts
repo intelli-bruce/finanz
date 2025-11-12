@@ -12,6 +12,35 @@ import * as XLSX from 'xlsx';
 
 const execPromise = promisify(exec);
 
+const DEFAULT_POSTGRES_CLI = 'docker exec -i finanz-postgres psql -U postgres -d postgres';
+const postgresCliCommand =
+  process.env.POSTGRES_PSQL === 'disable'
+    ? null
+    : (process.env.POSTGRES_PSQL && process.env.POSTGRES_PSQL.trim().length > 0
+        ? process.env.POSTGRES_PSQL.trim()
+        : DEFAULT_POSTGRES_CLI);
+
+const wrapSqlForJson = (sql: string) =>
+  `select coalesce(json_agg(t), '[]'::json) from (${sql}) as t`;
+
+async function runReportingQuery<T>(sql: string): Promise<T[]> {
+  if (!postgresCliCommand) {
+    throw new Error('Postgres CLI command not configured (set POSTGRES_PSQL)');
+  }
+
+  const wrappedSql = wrapSqlForJson(sql);
+  const escapedSql = wrappedSql.replace(/"/g, '\\"');
+  const command = `${postgresCliCommand} -t -A -c "${escapedSql}"`;
+  const { stdout } = await execPromise(command);
+  const jsonMatch = stdout.match(/\[[\s\S]*\]/);
+
+  if (!jsonMatch) {
+    throw new Error(`Unexpected Postgres output: ${stdout}`);
+  }
+
+  return JSON.parse(jsonMatch[0]) as T[];
+}
+
 // 환경 변수 로드
 dotenv.config();
 
@@ -54,6 +83,42 @@ type TransactionFilePayload = {
   currency?: string;
   total?: number;
   records: TransactionRecord[];
+};
+
+type MonthlyCashflowRow = {
+  period_start: string;
+  period_end: string;
+  operating_cash_flow: number;
+  investing_cash_flow: number;
+  financing_cash_flow: number;
+  total_inflows: number;
+  total_outflows: number;
+  net_cash_flow: number;
+};
+
+type CashflowBreakdownRow = {
+  period_start: string;
+  id: string;
+  channel_name: string;
+  description: string | null;
+  amount: number;
+  occurred_at: string;
+};
+
+type BalanceSheetMonthlySummaryRow = {
+  period_start: string;
+  period_end: string;
+  assets: number;
+  liabilities: number;
+  equity: number;
+};
+
+type BalanceSheetMonthlyChannelRow = {
+  period_start: string;
+  period_end: string;
+  channel_name: string;
+  reporting_role: string;
+  closing_balance: number;
 };
 
 // Supabase 클라이언트 설정
@@ -836,6 +901,88 @@ app.get('/storage/info/:filename', async (req: Request, res: Response) => {
 // ============================================
 
 // Excel 파일 암호 해제
+app.get('/reports/cashflow/monthly', async (req: Request, res: Response) => {
+  if (!postgresCliCommand) {
+    return res.status(503).json({ error: 'Postgres reporting은 비활성화되었습니다. POSTGRES_PSQL 환경 변수를 설정하세요.' });
+  }
+
+  try {
+    const rows = await runReportingQuery<MonthlyCashflowRow>(
+      `select
+         period_start::text,
+         period_end::text,
+         operating_cash_flow,
+         investing_cash_flow,
+         financing_cash_flow,
+         total_inflows,
+         total_outflows,
+         net_cash_flow
+       from reporting.cash_flow_monthly
+       order by period_start`
+    );
+
+    const breakdownRows = await runReportingQuery<CashflowBreakdownRow>(
+      `select
+         date_trunc('month', t.occurred_at)::date::text as period_start,
+         t.id::text,
+         cr.name as channel_name,
+         coalesce(t.description, '') as description,
+         t.amount,
+         t.occurred_at::text
+       from reporting.external_asset_transactions t
+       join reporting.channel_roles cr on cr.id = t.channel_id
+       order by period_start, t.occurred_at`
+    );
+
+    const breakdown = breakdownRows.reduce<Record<string, CashflowBreakdownRow[]>>((acc, row) => {
+      if (!acc[row.period_start]) {
+        acc[row.period_start] = [];
+      }
+      acc[row.period_start].push(row);
+      return acc;
+    }, {});
+
+    res.json({ rows, breakdown });
+  } catch (error: any) {
+    console.error('Failed to fetch monthly cash flow', error);
+    res.status(500).json({ error: '월별 현금흐름표 조회에 실패했습니다', detail: error?.message });
+  }
+});
+
+app.get('/reports/balance-sheet/monthly', async (req: Request, res: Response) => {
+  if (!postgresCliCommand) {
+    return res.status(503).json({ error: 'Postgres reporting은 비활성화되었습니다. POSTGRES_PSQL 환경 변수를 설정하세요.' });
+  }
+
+  try {
+    const summary = await runReportingQuery<BalanceSheetMonthlySummaryRow>(
+      `select period_start::text,
+              period_end::text,
+              assets,
+              liabilities,
+              equity
+         from reporting.balance_sheet_monthly_summary
+        order by period_start`
+    );
+
+    const channels = await runReportingQuery<BalanceSheetMonthlyChannelRow>(
+      `select b.period_start::text,
+              b.period_end::text,
+              r.name as channel_name,
+              r.reporting_role,
+              b.closing_balance
+         from reporting.balance_sheet_monthly_channel b
+         join reporting.channel_roles r on r.id = b.channel_id
+        order by b.period_start, r.reporting_role, r.name`
+    );
+
+    res.json({ summary, channels });
+  } catch (error: any) {
+    console.error('Failed to fetch monthly balance sheet', error);
+    res.status(500).json({ error: '월별 대차대조표 조회에 실패했습니다', detail: error?.message });
+  }
+});
+
 app.post('/decrypt-excel', upload.single('file'), async (req: Request, res: Response) => {
   const tempInputPath = path.join('/tmp', `input-${Date.now()}.xlsx`);
   const tempOutputPath = path.join('/tmp', `output-${Date.now()}.xlsx`);

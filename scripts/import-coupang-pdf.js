@@ -132,10 +132,12 @@ function parseReceipt(chunk, pdfPath, pageOffset, timezone) {
   }
 
   const idBase = orderNumber || approvalNumber || `unknown-${Date.now()}`;
+  // Include page number to make ID unique when one order has multiple products
+  const uniqueId = `coupang-${idBase}-p${pageOffset}`;
 
   const amount = totalAmount != null ? -Math.abs(totalAmount) : null;
   return {
-    id: `coupang-${idBase}`,
+    id: uniqueId,
     occurredAt,
     description: productName || vendorName || '쿠팡 주문',
     transactionType: 'purchase',

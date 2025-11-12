@@ -122,7 +122,7 @@ function generateSqlForFile(filePath, json) {
     masked_number = EXCLUDED.masked_number,
     owner = EXCLUDED.owner,
     metadata = EXCLUDED.metadata
-  RETURNING id;`;
+  RETURNING id INTO v_channel_id;`;
 
   const fileInsert = `INSERT INTO transaction_files (
     schema_version, source_file, timezone, currency,
@@ -154,7 +154,7 @@ function generateSqlForFile(filePath, json) {
     period_from = EXCLUDED.period_from,
     period_to = EXCLUDED.period_to,
     summary = EXCLUDED.summary
-  RETURNING id;`;
+  RETURNING id INTO v_file_id;`;
 
   const records = Array.isArray(json.records)
     ? json.records
@@ -174,8 +174,8 @@ function generateSqlForFile(filePath, json) {
     const metadata = sqlJson(record.metadata);
     const raw = sqlJson(record.raw);
     return `(
-      file_id,
-      channel_id,
+      v_file_id,
+      v_channel_id,
       NULL,
       ${sqlLiteral(record.id)},
       ${occurredAt},
@@ -208,19 +208,17 @@ function generateSqlForFile(filePath, json) {
   return `-- ${relPath}
 DO $$
 DECLARE
-  file_id uuid;
-  channel_id uuid;
+  v_file_id uuid;
+  v_channel_id uuid;
 BEGIN
-  SELECT id INTO channel_id FROM channels WHERE external_id = ${sqlLiteral(channelExternalId)};
-  IF channel_id IS NULL THEN
+  SELECT id INTO v_channel_id FROM channels WHERE external_id = ${sqlLiteral(channelExternalId)};
+  IF v_channel_id IS NULL THEN
     ${channelInsert}
-    INTO channel_id;
   END IF;
 
-  SELECT id INTO file_id FROM transaction_files WHERE source_file = ${sqlLiteral(sourceFile)};
-  IF file_id IS NULL THEN
+  SELECT id INTO v_file_id FROM transaction_files WHERE source_file = ${sqlLiteral(sourceFile)};
+  IF v_file_id IS NULL THEN
     ${fileInsert}
-    INTO file_id;
   END IF;
 
   ${insertTransactions}

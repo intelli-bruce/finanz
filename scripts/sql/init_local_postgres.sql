@@ -2,8 +2,16 @@
 
 create extension if not exists pgcrypto;
 
-create type if not exists channel_type as enum ('bank', 'card', 'wallet', 'investment', 'other');
-create type if not exists transaction_origin as enum ('actual', 'forecast', 'scenario');
+-- Create custom types (with DO block for idempotency)
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'channel_type') then
+    create type channel_type as enum ('bank', 'card', 'wallet', 'investment', 'other');
+  end if;
+  if not exists (select 1 from pg_type where typname = 'transaction_origin') then
+    create type transaction_origin as enum ('actual', 'forecast', 'scenario');
+  end if;
+end $$;
 
 create table if not exists transaction_files (
   id              uuid primary key default gen_random_uuid(),
@@ -22,9 +30,17 @@ create table if not exists transaction_files (
   created_at      timestamptz not null default now()
 );
 
-alter table transaction_files
-  add constraint if not exists transaction_files_source_unique
-  unique (source_file);
+-- Add unique constraint on source_file
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'transaction_files_source_unique'
+  ) then
+    alter table transaction_files
+      add constraint transaction_files_source_unique unique (source_file);
+  end if;
+end $$;
 
 create table if not exists channels (
   id              uuid primary key default gen_random_uuid(),
@@ -60,9 +76,17 @@ create table if not exists transactions (
   created_at          timestamptz not null default now()
 );
 
-alter table transactions
-  add constraint if not exists transactions_file_record_unique
-  unique (file_id, record_id);
+-- Add unique constraint on (file_id, record_id)
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'transactions_file_record_unique'
+  ) then
+    alter table transactions
+      add constraint transactions_file_record_unique unique (file_id, record_id);
+  end if;
+end $$;
 
 create index if not exists idx_transactions_occurred_at on transactions(occurred_at);
 create index if not exists idx_transactions_channel on transactions(channel_id);

@@ -31,6 +31,10 @@ create table transaction_files (
   created_at      timestamptz not null default now()
 );
 
+alter table transaction_files
+  add constraint transaction_files_source_unique
+  unique (source_file);
+
 create table channels (
   id              uuid primary key default gen_random_uuid(),
   external_id     text unique,
@@ -64,6 +68,10 @@ create table transactions (
   raw             jsonb not null,
   created_at      timestamptz not null default now()
 );
+
+alter table transactions
+  add constraint transactions_file_record_unique
+  unique (file_id, record_id);
 
 -- 확장 테이블(transaction_tags, income_sources 등)은 필요 시 별도 스크립트에서 정의합니다.
 ```

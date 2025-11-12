@@ -22,6 +22,10 @@ create table if not exists transaction_files (
   created_at      timestamptz not null default now()
 );
 
+alter table transaction_files
+  add constraint if not exists transaction_files_source_unique
+  unique (source_file);
+
 create table if not exists channels (
   id              uuid primary key default gen_random_uuid(),
   external_id     text unique,
@@ -55,6 +59,10 @@ create table if not exists transactions (
   raw                 jsonb not null,
   created_at          timestamptz not null default now()
 );
+
+alter table transactions
+  add constraint if not exists transactions_file_record_unique
+  unique (file_id, record_id);
 
 create index if not exists idx_transactions_occurred_at on transactions(occurred_at);
 create index if not exists idx_transactions_channel on transactions(channel_id);

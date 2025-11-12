@@ -11,4 +11,9 @@
    ```bash
    psql postgresql://postgres:finanz@localhost:5432/postgres -c "\dt"
    ```
-4. Update ingest scripts to insert into `transaction_files`, `channels`, `transactions`.
+4. (Optional) JSON → SQL 변환:
+   ```bash
+   node scripts/db/generate-transaction-sql.js --dir data/transactions --out /tmp/transactions.sql
+   psql postgresql://postgres:finanz@localhost:5432/postgres -f /tmp/transactions.sql
+   ```
+5. Update ingest scripts to insert into `transaction_files`, `channels`, `transactions`.

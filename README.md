@@ -164,6 +164,8 @@ type TransactionRecord = {
 
 📐 **JSON Schema**: `schemas/transaction-file.schema.json`에 머신 검증용 스키마를 제공하므로, 신규 거래 JSON을 추가하기 전 `npx ajv validate -s schemas/transaction-file.schema.json -d data/transactions/<file>.json` 등으로 확인하세요.
 
+🗄️ **Database Schema**: 장기적으로는 PostgreSQL이 거래의 단일 소스가 됩니다. 초안 DDL과 테이블 관계는 `docs/db-schema.md`를 참고하세요.
+
 ## API 엔드포인트
 
 ### 마크다운 관리

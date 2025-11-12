@@ -1,15 +1,13 @@
 # Finanz Database Schema (Draft)
 
 ## 1. Overview
-PostgreSQL is used as the canonical data store. JSON files remain for snapshots, but ingestion pipelines write into the following tables:
+PostgreSQL is the canonical data store. JSON files remain for snapshots, but ingestion pipelines primarily interact with **세 가지 테이블만** 사용합니다:
 
-- `transaction_files`: metadata for each imported file.
-- `channels`: bank/card/wallet/investment entities.
-- `transactions`: normalized transaction records.
-- `transaction_tags`: mapping table for free-form tags.
-- `income_sources`, `transaction_income_sources`: optional mapping for recurring revenue streams.
-- `scenarios`, `scenario_transactions`: forecast / simulation inputs.
-- `advices`: LLM/MCP output history (future).
+1. `transaction_files` – 가져온 파일/소스 메타데이터.
+2. `channels` – 계좌/카드/페이 등 금융 채널.
+3. `transactions` – 표준화된 거래 레코드.
+
+나머지(`transaction_tags`, `income_sources`, `scenarios`, `advices` 등)는 필요 시 확장 모듈로 추가합니다. **MVP 단계에서는 아래 세 테이블만 생성**하면 충분합니다.
 
 ## 2. DDL (PostgreSQL)
 ```sql
@@ -67,59 +65,7 @@ create table transactions (
   created_at      timestamptz not null default now()
 );
 
-create table transaction_tags (
-  transaction_id  uuid references transactions(id) on delete cascade,
-  tag             text not null,
-  primary key (transaction_id, tag)
-);
-
-create table income_sources (
-  id              uuid primary key default gen_random_uuid(),
-  name            text not null,
-  description     text,
-  metadata        jsonb,
-  created_at      timestamptz not null default now()
-);
-
-create table transaction_income_sources (
-  transaction_id  uuid references transactions(id) on delete cascade,
-  income_source_id uuid references income_sources(id) on delete cascade,
-  amount_override numeric(18,2),
-  primary key (transaction_id, income_source_id)
-);
-
-create table scenarios (
-  id              uuid primary key default gen_random_uuid(),
-  name            text not null,
-  description     text,
-  starts_at       timestamptz,
-  ends_at         timestamptz,
-  metadata        jsonb,
-  created_at      timestamptz not null default now()
-);
-
-create table scenario_transactions (
-  id              uuid primary key default gen_random_uuid(),
-  scenario_id     uuid references scenarios(id) on delete cascade,
-  base_transaction_id uuid references transactions(id),
-  record_id       text,
-  occurred_at     timestamptz,
-  description     text not null,
-  transaction_type text not null,
-  amount          numeric(18,2),
-  metadata        jsonb,
-  raw             jsonb,
-  created_at      timestamptz not null default now()
-);
-
-create table advices (
-  id              uuid primary key default gen_random_uuid(),
-  issued_at       timestamptz not null default now(),
-  advisor         text default 'LLM-MCP',
-  scenario_id     uuid references scenarios(id),
-  content         text not null,
-  metadata        jsonb
-);
+-- 확장 테이블(transaction_tags, income_sources 등)은 필요 시 별도 스크립트에서 정의합니다.
 ```
 
 ## 3. Relationships

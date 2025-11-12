@@ -100,3 +100,4 @@ create index idx_transactions_origin on transactions(origin);
 - Materialized views for monthly summaries per channel.
 - `flows` table to persist matched transfer edges.
 - Audit triggers for changes (esp. tags, categories, scenario edits).
+- **Sign normalization**: JSON ingest와 SQL dump 단계에서 거래 유형의 `[+]` / `[-]` 프리픽스를 감지해 `transactions.amount` 부호를 강제합니다. 레거시 데이터는 `scripts/sql/fix_amount_signs.sql`을 실행해 한 번 더 보정한 뒤 `npm run test:reports`로 회계 무결성을 검증하세요.

@@ -48,6 +48,59 @@ function listJsonFiles(rootDir) {
   return results.sort();
 }
 
+function toNumber(value) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === 'string') {
+    const parsed = Number(value);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+}
+
+function extractExplicitSign(record) {
+  const hints = [];
+  const candidates = [];
+  if (typeof record.transactionType === 'string') {
+    candidates.push(record.transactionType);
+  }
+  const raw = record.raw || {};
+  ['거래구분', '거래 구분', '구분'].forEach((key) => {
+    if (typeof raw[key] === 'string') {
+      candidates.push(raw[key]);
+    }
+  });
+
+  candidates.forEach((text) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    if (trimmed.startsWith('[-')) {
+      hints.push(-1);
+    } else if (trimmed.startsWith('[+')) {
+      hints.push(1);
+    }
+  });
+
+  const hasPositive = hints.includes(1);
+  const hasNegative = hints.includes(-1);
+  if (hasPositive && !hasNegative) return 1;
+  if (hasNegative && !hasPositive) return -1;
+  return 0;
+}
+
+function normalizeAmount(record) {
+  const numeric = toNumber(record.amount);
+  if (numeric === null) return null;
+  if (numeric === 0) return 0;
+  const desiredSign = extractExplicitSign(record);
+  if (!desiredSign) return numeric;
+  const currentSign = numeric > 0 ? 1 : -1;
+  if (currentSign === desiredSign) return numeric;
+  return Math.abs(numeric) * desiredSign;
+}
+
 function sqlLiteral(value) {
   if (value === null || value === undefined) return 'NULL';
   if (typeof value === 'number') {
@@ -168,7 +221,8 @@ function generateSqlForFile(filePath, json) {
   const values = records.map((record) => {
     const occurredAt = toTimestamp(record.occurredAt?.utc || record.occurredAt?.iso);
     const confirmedAt = toTimestamp(record.confirmedAt?.utc || record.confirmedAt?.iso);
-    const amount = record.amount == null ? 'NULL' : record.amount;
+    const normalizedAmount = normalizeAmount(record);
+    const amount = normalizedAmount == null ? 'NULL' : normalizedAmount;
     const balance = record.balance == null ? 'NULL' : record.balance;
     const tags = sqlArray(record.tags);
     const metadata = sqlJson(record.metadata);

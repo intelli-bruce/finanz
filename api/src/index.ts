@@ -121,6 +121,30 @@ type BalanceSheetMonthlyChannelRow = {
   closing_balance: number;
 };
 
+type IncomeSourceMonthlyRow = {
+  period_start: string;
+  period_end: string;
+  source_name: string;
+  total_amount: number;
+  transaction_count: number;
+};
+
+type CardInstallmentPlanRow = {
+  transaction_id: string;
+  channel_id: string;
+  channel_name: string;
+  description: string;
+  purchase_date: string;
+  total_amount: number;
+  installment_months: number;
+  monthly_amount: number;
+  paid_months: number;
+  remaining_months: number;
+  remaining_principal: number;
+  first_due_month: string;
+  projected_end_date: string;
+};
+
 // Supabase 클라이언트 설정
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
@@ -980,6 +1004,60 @@ app.get('/reports/balance-sheet/monthly', async (req: Request, res: Response) =>
   } catch (error: any) {
     console.error('Failed to fetch monthly balance sheet', error);
     res.status(500).json({ error: '월별 대차대조표 조회에 실패했습니다', detail: error?.message });
+  }
+});
+
+app.get('/reports/income-sources/monthly', async (req: Request, res: Response) => {
+  if (!postgresCliCommand) {
+    return res.status(503).json({ error: 'Postgres reporting은 비활성화되었습니다. POSTGRES_PSQL 환경 변수를 설정하세요.' });
+  }
+
+  try {
+    const rows = await runReportingQuery<IncomeSourceMonthlyRow>(
+      `select period_start::text,
+              period_end::text,
+              source_name,
+              total_amount,
+              transaction_count
+         from reporting.income_source_monthly_summary
+        order by period_start, total_amount desc`
+    );
+
+    res.json({ rows });
+  } catch (error: any) {
+    console.error('Failed to fetch monthly income sources', error);
+    res.status(500).json({ error: '월별 수입원 집계 조회에 실패했습니다', detail: error?.message });
+  }
+});
+
+app.get('/reports/card-installments', async (req: Request, res: Response) => {
+  if (!postgresCliCommand) {
+    return res.status(503).json({ error: 'Postgres reporting은 비활성화되었습니다. POSTGRES_PSQL 환경 변수를 설정하세요.' });
+  }
+
+  try {
+    const plans = await runReportingQuery<CardInstallmentPlanRow>(
+      `select transaction_id::text,
+              channel_id::text,
+              channel_name,
+              description,
+              purchase_date::text,
+              total_amount,
+              installment_months,
+              monthly_amount,
+              paid_months,
+              remaining_months,
+              remaining_principal,
+              first_due_month::text,
+              projected_end_date::text
+         from reporting.card_installment_plans
+        order by purchase_date desc`
+    );
+
+    res.json({ plans });
+  } catch (error: any) {
+    console.error('Failed to fetch card installment plans', error);
+    res.status(500).json({ error: '카드 할부 거래 조회에 실패했습니다', detail: error?.message });
   }
 });
 

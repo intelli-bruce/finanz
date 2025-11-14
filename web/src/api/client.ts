@@ -170,6 +170,40 @@ export const getMonthlyCashflow = async (): Promise<MonthlyCashflowResponse> => 
   return response.data;
 };
 
+export interface IncomeSourceMonthlyRow {
+  period_start: string;
+  period_end: string;
+  source_name: string;
+  total_amount: number;
+  transaction_count: number;
+}
+
+export const getMonthlyIncomeSources = async () => {
+  const response = await apiClient.get<{ rows: IncomeSourceMonthlyRow[] }>('/reports/income-sources/monthly');
+  return response.data.rows;
+};
+
+export interface CardInstallmentPlanRow {
+  transaction_id: string;
+  channel_id: string;
+  channel_name: string;
+  description: string;
+  purchase_date: string;
+  total_amount: number;
+  installment_months: number;
+  monthly_amount: number;
+  paid_months: number;
+  remaining_months: number;
+  remaining_principal: number;
+  first_due_month: string;
+  projected_end_date: string;
+}
+
+export const getCardInstallments = async () => {
+  const response = await apiClient.get<{ plans: CardInstallmentPlanRow[] }>('/reports/card-installments');
+  return response.data.plans;
+};
+
 export interface BalanceSheetMonthlySummaryRow {
   period_start: string;
   period_end: string;

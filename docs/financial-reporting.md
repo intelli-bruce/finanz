@@ -17,6 +17,9 @@
 | `reporting.balance_sheet_half_year_channel` | 채널별 반기말 잔액. |
 | `reporting.balance_sheet_*_summary` | 위 세 채널 뷰를 집계해 자산/부채/자기자본(=자산-부채) 요약. |
 | `reporting.cash_flow_monthly` | `external_asset_transactions`를 월별로 집계해 영업/투자/재무 및 순현금 흐름을 계산. 내부 이체는 자동으로 제외됩니다. |
+| `reporting.income_source_monthly_summary` | 입금 거래를 적요 패턴에 따라 수입원별로 분류해 월별 합계를 계산합니다. |
+| `reporting.card_installment_plans` | 카드 채널에서 적발된 할부 거래를 카드사별/거래별로 구조화한 뷰입니다. 총액, 할부개월, 남은 개월/잔여 원금이 포함됩니다. |
+| `reporting.card_installment_schedule` | 각 할부 거래가 월별로 얼마씩 상환되는지 일정표 형태로 전개한 뷰입니다. 향후 월별 카드 현금 유출 계획을 세울 때 활용할 수 있습니다. |
 
 > **주의**: 카드 채널의 `closing_balance`는 음수(부채)로 누적됩니다. 숫자를 양수로 보고 싶다면 쿼리에서 `abs()`를 적용하세요.
 
@@ -102,4 +105,6 @@ limit 3;
 - `POSTGRES_PSQL` 환경 변수를 통해 CLI 경로를 제어할 수 있습니다. 기본값은 `docker exec -i finanz-postgres psql -U postgres -d postgres`이며, 로컬 `psql`을 쓰고 싶다면 `POSTGRES_PSQL="psql -U postgres -d postgres"` 형태로 지정하세요. 비활성화하려면 `POSTGRES_PSQL=disable`로 설정합니다.
 - API 엔드포인트: `GET /reports/cashflow/monthly` — `reporting.cash_flow_monthly` 뷰를 JSON으로 반환합니다. 내부 이체(자산 채널 간 동일 금액·근접 시각)로 판정된 전표는 자동 제외되므로 실질적인 외부 현금 유입/유출만 집계됩니다.
 - API 엔드포인트: `GET /reports/balance-sheet/monthly` — `reporting.balance_sheet_monthly_summary` 및 `balance_sheet_monthly_channel` 뷰를 함께 조회합니다.
+- API 엔드포인트: `GET /reports/income-sources/monthly` — `reporting.income_source_monthly_summary` 뷰를 조회해 월별 수입원별 합계와 건수를 제공합니다.
+- API 엔드포인트: `GET /reports/card-installments` — `reporting.card_installment_plans` 뷰를 조회해 카드사별 할부 거래 총액, 월 상환액, 잔여 월 수를 정리합니다. 필요 시 `card_installment_schedule` 뷰로 월별 일정까지 확인할 수 있습니다.
 - 웹 UI의 **Cashflow** / **Balance Sheet** 탭이 위 엔드포인트에 연결되어 월별 현금흐름표와 대차대조표를 표시합니다.

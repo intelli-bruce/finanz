@@ -21,3 +21,9 @@ npm-debug.log*
 
 # Uploads (now using Supabase Storage)
 data/uploads/
+
+# Personal tax documents
+연말정산_2025/
+지급내역.csv
+.codex_sessions
+.serena/

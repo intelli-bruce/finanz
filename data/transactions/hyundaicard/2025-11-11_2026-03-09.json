@@ -1,0 +1,418 @@
+{
+  "generatedAt": "2026-03-09T02:29:37.649841Z",
+  "sourceFile": "hyundaicard_20260309.xls",
+  "timezone": "+09:00",
+  "account": {
+    "bank": "현대카드",
+    "holder": "최종혁",
+    "number": ""
+  },
+  "period": {
+    "from": "2025-01-24",
+    "to": "2025-11-06"
+  },
+  "total": 20,
+  "currency": "KRW",
+  "records": [
+    {
+      "id": "card-1",
+      "occurredAt": {
+        "iso": "2025-10-12T00:00:00+09:00",
+        "utc": "2025-10-12T00:00:00.000Z"
+      },
+      "description": "(주)이니시스 - (주)스타벅스커피코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -10000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 12일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "(주)이니시스 - (주)스타벅스커피코리아                             10,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-2",
+      "occurredAt": {
+        "iso": "2025-10-19T00:00:00+09:00",
+        "utc": "2025-10-19T00:00:00.000Z"
+      },
+      "description": "(주)이니시스 - (주)스타벅스커피코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -10000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 19일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "(주)이니시스 - (주)스타벅스커피코리아                             10,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-3",
+      "occurredAt": {
+        "iso": "2025-10-21T00:00:00+09:00",
+        "utc": "2025-10-21T00:00:00.000Z"
+      },
+      "description": "마이시큐리티",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -600,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 21일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "마이시큐리티                             600",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-4",
+      "occurredAt": {
+        "iso": "2025-10-24T00:00:00+09:00",
+        "utc": "2025-10-24T00:00:00.000Z"
+      },
+      "description": "11번가_SKpay",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -48970,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 24일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "11번가_SKpay                             48,970",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-5",
+      "occurredAt": {
+        "iso": "2025-10-25T00:00:00+09:00",
+        "utc": "2025-10-25T00:00:00.000Z"
+      },
+      "description": "나이스 - 나이스인프라주식회사",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -5000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 25일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "나이스 - 나이스인프라주식회사                             5,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-6",
+      "occurredAt": {
+        "iso": "2025-10-26T00:00:00+09:00",
+        "utc": "2025-10-26T00:00:00.000Z"
+      },
+      "description": "(주)이니시스 - (주)스타벅스커피코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -10000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 26일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "(주)이니시스 - (주)스타벅스커피코리아                             10,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-7",
+      "occurredAt": {
+        "iso": "2025-10-26T00:00:00+09:00",
+        "utc": "2025-10-26T00:00:00.000Z"
+      },
+      "description": "(주)이니시스 - (주)스타벅스커피코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -10000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 26일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "(주)이니시스 - (주)스타벅스커피코리아                             10,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-8",
+      "occurredAt": {
+        "iso": "2025-11-01T00:00:00+09:00",
+        "utc": "2025-11-01T00:00:00.000Z"
+      },
+      "description": "올리브영하남미사역점",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -3000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 01일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "올리브영하남미사역점                             3,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-9",
+      "occurredAt": {
+        "iso": "2025-11-01T00:00:00+09:00",
+        "utc": "2025-11-01T00:00:00.000Z"
+      },
+      "description": "코스트코연회비",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -38000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 01일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "코스트코연회비                             38,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-10",
+      "occurredAt": {
+        "iso": "2025-11-02T00:00:00+09:00",
+        "utc": "2025-11-02T00:00:00.000Z"
+      },
+      "description": "(주)이니시스 - (주)스타벅스커피코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -10000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 02일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "(주)이니시스 - (주)스타벅스커피코리아                             10,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-11",
+      "occurredAt": {
+        "iso": "2025-11-06T00:00:00+09:00",
+        "utc": "2025-11-06T00:00:00.000Z"
+      },
+      "description": "코스트코코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -5600,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 06일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "코스트코코리아                             5,600",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-12",
+      "occurredAt": {
+        "iso": "2025-11-06T00:00:00+09:00",
+        "utc": "2025-11-06T00:00:00.000Z"
+      },
+      "description": "코스트코코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -335840,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 06일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "코스트코코리아                             335,840",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-13",
+      "occurredAt": {
+        "iso": "2025-11-06T00:00:00+09:00",
+        "utc": "2025-11-06T00:00:00.000Z"
+      },
+      "description": "코스트코코리아",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -20100,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 06일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "코스트코코리아                             20,100",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-14",
+      "occurredAt": {
+        "iso": "2025-10-01T00:00:00+09:00",
+        "utc": "2025-10-01T00:00:00.000Z"
+      },
+      "description": "Google Digital Inc.,USD:82.93",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -118869,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 10월 01일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "Google Digital Inc.,USD:82.93                             118,869",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-15",
+      "occurredAt": {
+        "iso": "2025-11-01T00:00:00+09:00",
+        "utc": "2025-11-01T00:00:00.000Z"
+      },
+      "description": "Google Digital Inc.,USD:77.80",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -113557,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 01일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "Google Digital Inc.,USD:77.80                             113,557",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-16",
+      "occurredAt": {
+        "iso": "2025-01-24T00:00:00+09:00",
+        "utc": "2025-01-24T00:00:00.000Z"
+      },
+      "description": "토스페이먼츠 - 주식회사 데이원컴퍼니",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -469000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 01월 24일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "토스페이먼츠 - 주식회사 데이원컴퍼니                             469,000",
+        "결제원금": "78,000"
+      }
+    },
+    {
+      "id": "card-17",
+      "occurredAt": {
+        "iso": "2025-06-15T00:00:00+09:00",
+        "utc": "2025-06-15T00:00:00.000Z"
+      },
+      "description": "한국정보통신 - 쿠팡",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -74000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 06월 15일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "한국정보통신 - 쿠팡                             74,000",
+        "결제원금": "0"
+      }
+    },
+    {
+      "id": "card-18",
+      "occurredAt": {
+        "iso": "2025-09-16T00:00:00+09:00",
+        "utc": "2025-09-16T00:00:00.000Z"
+      },
+      "description": "토스페이먼츠 - 엘지유플러스",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -986500,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 09월 16일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "토스페이먼츠 - 엘지유플러스                             986,500",
+        "결제원금": "876,800"
+      }
+    },
+    {
+      "id": "card-19",
+      "occurredAt": {
+        "iso": "2025-09-19T00:00:00+09:00",
+        "utc": "2025-09-19T00:00:00.000Z"
+      },
+      "description": "(주)이니시스 - 애플코리아 유한회사",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -329000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 09월 19일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "(주)이니시스 - 애플코리아 유한회사                             329,000",
+        "결제원금": "109,600"
+      }
+    },
+    {
+      "id": "card-20",
+      "occurredAt": {
+        "iso": "2025-11-04T00:00:00+09:00",
+        "utc": "2025-11-04T00:00:00.000Z"
+      },
+      "description": "토스페이먼츠 - 토스페이먼츠",
+      "transactionType": "카드결제",
+      "institution": "",
+      "counterAccount": "",
+      "amount": -330000,
+      "balance": 0,
+      "memo": "본인 ZERO",
+      "raw": {
+        "이용일": "2025년 11월 04일",
+        "이용카드": "본인 ZERO",
+        "이용가맹점": "토스페이먼츠 - 토스페이먼츠                             330,000",
+        "결제원금": "220,000"
+      }
+    }
+  ]
+}

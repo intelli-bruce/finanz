@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>finanz Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --text: #e2e8f0; --muted: #94a3b8;
+    --accent: #38bdf8; --green: #4ade80; --red: #f87171; --yellow: #facc15; --gray: #64748b;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif;
+         margin: 0; padding: 20px; font-size: 14px; line-height: 1.5; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .meta { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; }
+  .card { background: var(--card); border-radius: 8px; padding: 16px; }
+  .card h2 { font-size: 14px; margin: 0 0 12px; color: var(--accent); font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #334155; }
+  th { color: var(--muted); font-weight: normal; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pos { color: var(--green); }
+  .neg { color: var(--red); }
+  .conf-high { color: var(--green); }
+  .conf-medium { color: var(--yellow); }
+  .conf-low { color: var(--gray); }
+  .stat-row { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat { background: var(--card); padding: 12px 16px; border-radius: 8px; flex: 1; min-width: 150px; }
+  .stat-label { color: var(--muted); font-size: 11px; }
+  .stat-value { font-size: 18px; font-weight: 600; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  canvas { max-height: 240px; }
+  .badge { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: #334155; }
+</style>
+</head>
+<body>
+<h1>finanz Dashboard</h1>
+<div class="meta" id="meta">Loading…</div>
+
+<div class="stat-row" id="stats"></div>
+
+<div class="grid">
+  <div class="card"><h2>채널별 잔액</h2><table id="balances"></table></div>
+  <div class="card"><h2>월별 외부 현금흐름 (수입/지출/순)</h2><canvas id="cashflow"></canvas></div>
+  <div class="card"><h2>향후 예상 입금 (receivables)</h2><table id="receivables"></table></div>
+  <div class="card"><h2>월별 예상 입금 합계 (confidence별)</h2><canvas id="monthly-rec"></canvas></div>
+  <div class="card"><h2>다음 결제 예정 (고정의무)</h2><table id="obligations"></table></div>
+  <div class="card"><h2>활성 구독 (월 합계)</h2><table id="subs"></table></div>
+  <div class="card"><h2>4월 카테고리별 지출</h2><canvas id="cat-expense"></canvas></div>
+  <div class="card"><h2>⚠️ 무결제 알림 / 만료 알림</h2><table id="alerts"></table></div>
+</div>
+
+<script>
+const fmt = n => n == null ? '-' : new Intl.NumberFormat('ko-KR').format(Math.round(n));
+const fmtSign = n => { if (n == null) return '-'; const s = fmt(Math.abs(n)); return n < 0 ? `-${s}` : s; };
+
+fetch('data.json').then(r => r.json()).then(d => {
+  // Meta
+  document.getElementById('meta').textContent =
+    `총 거래 ${d.meta.total_tx}건 · 마지막 거래 ${d.meta.last_tx} · 데이터 생성 ${d.meta.generated_at}`;
+
+  // Stats top row
+  const totalBalance = d.balances.reduce((s, b) => s + (Number(b.balance) || 0), 0);
+  const activeSubsTotal = d.active_subscriptions.reduce((s, x) =>
+    s + (Number(x.amount_estimate) * (x.billing_cycle === 'yearly' ? 1/12 : 1)), 0);
+  const obligationsTotal = d.upcoming_obligations.reduce((s, o) => s + Number(o.total_amount), 0);
+  const next3moRec = d.upcoming_receivables
+    .filter(r => new Date(r.expected_date) <= new Date(Date.now() + 90*86400000))
+    .reduce((s, r) => s + Number(r.total_amount), 0);
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-label">현재 총 잔액</div><div class="stat-value pos">₩${fmt(totalBalance)}</div></div>
+    <div class="stat"><div class="stat-label">월 고정의무</div><div class="stat-value neg">-₩${fmt(obligationsTotal)}</div></div>
+    <div class="stat"><div class="stat-label">월 활성 구독</div><div class="stat-value neg">-₩${fmt(activeSubsTotal)}</div></div>
+    <div class="stat"><div class="stat-label">3개월 예상 입금</div><div class="stat-value pos">₩${fmt(next3moRec)}</div></div>
+  `;
+
+  // Balances
+  document.getElementById('balances').innerHTML =
+    `<thead><tr><th>채널</th><th class="num">잔액</th><th>기준</th></tr></thead><tbody>` +
+    d.balances.map(b =>
+      `<tr><td>${b.channel}</td><td class="num">${fmt(b.balance)}</td><td>${b.as_of}</td></tr>`
+    ).join('') + `</tbody>`;
+
+  // Cashflow chart
+  new Chart(document.getElementById('cashflow'), {
+    type: 'bar',
+    data: {
+      labels: d.monthly_cashflow.map(m => m.month),
+      datasets: [
+        { label: '수입', data: d.monthly_cashflow.map(m => Number(m.income) || 0), backgroundColor: '#4ade80' },
+        { label: '지출', data: d.monthly_cashflow.map(m => Number(m.expense) || 0), backgroundColor: '#f87171' },
+        { label: '순', type: 'line', data: d.monthly_cashflow.map(m => Number(m.net) || 0), borderColor: '#38bdf8', backgroundColor: 'transparent' },
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { labels: { color: '#e2e8f0' } } },
+      scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8', callback: v => (v/1e6).toFixed(0) + 'M' } } } }
+  });
+
+  // Receivables
+  document.getElementById('receivables').innerHTML =
+    `<thead><tr><th>일자</th><th>항목</th><th class="num">금액</th><th>conf</th></tr></thead><tbody>` +
+    d.upcoming_receivables.slice(0, 12).map(r =>
+      `<tr><td>${r.expected_date}</td><td>${(r.contract_name + ' / ' + (r.stage_name||'')).slice(0,30)}</td>` +
+      `<td class="num">${fmt(r.total_amount)}</td><td class="conf-${r.confidence}">${r.confidence}</td></tr>`
+    ).join('') + `</tbody>`;
+
+  // Monthly receivables stacked bar
+  const months = [...new Set(d.monthly_receivables.map(m => m.month))].sort();
+  const stacked = ['high', 'medium', 'low'].map(conf => ({
+    label: conf,
+    data: months.map(m => Number(d.monthly_receivables.find(x => x.month === m && x.confidence === conf)?.total) || 0),
+    backgroundColor: conf === 'high' ? '#4ade80' : conf === 'medium' ? '#facc15' : '#64748b'
+  }));
+  new Chart(document.getElementById('monthly-rec'), {
+    type: 'bar',
+    data: { labels: months, datasets: stacked },
+    options: { responsive: true, plugins: { legend: { labels: { color: '#e2e8f0' } } },
+      scales: { x: { stacked: true, ticks: { color: '#94a3b8' } }, y: { stacked: true, ticks: { color: '#94a3b8', callback: v => (v/1e6).toFixed(0) + 'M' } } } }
+  });
+
+  // Obligations
+  document.getElementById('obligations').innerHTML =
+    `<thead><tr><th>항목</th><th class="num">금액</th><th>다음 결제일</th></tr></thead><tbody>` +
+    d.upcoming_obligations.map(o =>
+      `<tr><td>${o.name.slice(0, 32)}</td><td class="num">${fmt(o.total_amount)}</td><td>${o.next_due || '-'}</td></tr>`
+    ).join('') + `</tbody>`;
+
+  // Subscriptions
+  document.getElementById('subs').innerHTML =
+    `<thead><tr><th>서비스</th><th class="num">금액</th><th>주기</th></tr></thead><tbody>` +
+    d.active_subscriptions.map(s =>
+      `<tr><td>${s.service_name}</td><td class="num">${fmt(s.amount_estimate)} ${s.currency==='USD'?'<span class="badge">USD</span>':''}</td><td>${s.billing_cycle}</td></tr>`
+    ).join('') + `</tbody>`;
+
+  // Category expense
+  new Chart(document.getElementById('cat-expense'), {
+    type: 'bar',
+    data: {
+      labels: d.expense_by_category.map(c => c.category || '미분류'),
+      datasets: [{ label: '4월 지출', data: d.expense_by_category.map(c => Number(c.total)), backgroundColor: '#f87171' }]
+    },
+    options: { indexAxis: 'y', plugins: { legend: { display: false } },
+      scales: { x: { ticks: { color: '#94a3b8', callback: v => (v/1e6).toFixed(1) + 'M' } }, y: { ticks: { color: '#94a3b8' } } } }
+  });
+
+  // Alerts (stale + expiring)
+  let alerts = '<thead><tr><th>유형</th><th>항목</th><th class="num">값</th></tr></thead><tbody>';
+  d.stale_subscriptions.forEach(s =>
+    alerts += `<tr><td><span class="badge">stale</span></td><td>${s.service_name}</td><td class="num neg">${s.days_stale}일 무결제</td></tr>`);
+  d.expiring_obligations.forEach(o =>
+    alerts += `<tr><td><span class="badge">expiring</span></td><td>${o.name.slice(0, 30)}</td><td class="num">D-${o.days_left}</td></tr>`);
+  alerts += '</tbody>';
+  document.getElementById('alerts').innerHTML = alerts;
+});
+</script>
+</body>
+</html>

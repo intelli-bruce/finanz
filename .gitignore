@@ -32,3 +32,23 @@ data/uploads/
 dashboard/data.json
 
 __pycache__/
+
+# Money data migrated from bruce-vault (local-only, never push to GitHub)
+data/payroll/
+data/tax/
+data/contracts/
+data/statements/
+data/orders/
+data/quotes/
+data/revenue/
+data/expenses/
+data/personal/
+data/business-info/
+data/projects/
+
+# Obsidian (vault registered 2026-05-03)
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/cache/
+.obsidian/*.json.bak
+.smtcmp_vector_db.tar.gz

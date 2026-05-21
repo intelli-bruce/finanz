@@ -7,7 +7,7 @@ import {
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-const API_URL = process.env.FINANZ_API_URL || 'http://localhost:3002';
+const API_URL = process.env.BRUCE_WEALTH_OS_API_URL || 'http://localhost:3002';
 
 // API 호출 헬퍼
 async function callAPI(endpoint: string, options?: RequestInit) {
@@ -24,7 +24,7 @@ async function callAPI(endpoint: string, options?: RequestInit) {
 // MCP 서버 생성
 const server = new Server(
   {
-    name: 'finanz-mcp',
+    name: 'bruce-wealth-os-mcp',
     version: '1.0.0',
   },
   {
@@ -522,7 +522,7 @@ URL: ${result.url}`;
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error('Finanz MCP server running on stdio');
+  console.error('Bruce Wealth OS MCP server running on stdio');
 }
 
 main().catch((error) => {

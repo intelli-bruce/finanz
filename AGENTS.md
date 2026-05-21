@@ -1,5 +1,5 @@
 # Repository Guidelines
-Finanz monorepo는 financial markdown과 웹 시각화를 다룹니다.
+Bruce Wealth OS monorepo는 financial markdown과 웹 시각화를 다룹니다.
 
 ## Project Structure & Module Organization
 - `api/`는 Express + TypeScript 기반 REST API이며 `src/`에 라우터·Supabase client, `dist/`에 빌드 산출물이 위치합니다.
@@ -34,7 +34,7 @@ Finanz monorepo는 financial markdown과 웹 시각화를 다룹니다.
 
 ## Security & Configuration Tips
 - `api/.env`에 `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `PORT`를 채우고 업로드 캐시는 항상 `.gitignore`.
-- MCP 실행 시 `FINANZ_API_URL`과 Claude Desktop config(~/Library/Application Support/Claude/claude_desktop_config.json)을 README와 동일하게 유지합니다.
+- MCP 실행 시 `BRUCE_WEALTH_OS_API_URL`과 Claude Desktop config(~/Library/Application Support/Claude/claude_desktop_config.json)을 README와 동일하게 유지합니다.
 - Node 18 / npm 9 이상에서 `npm outdated` 결과를 공유하고 의존성 범위를 갱신하세요.
 
 ## API & MCP Notes

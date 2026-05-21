@@ -26,7 +26,7 @@ log-type: expense
 - 지출기록/: 일별 지출 로그
 
 ## 담당 에이전트
-- Finanz — 재무/회계/세무/법무 전담
+- Bruce Wealth OS — 재무/회계/세무/법무 전담
 
 ## 에이전트 참고사항
 - 구독 고정비: $465/월 ≈ ₩674,000 (Anthropic, GW, Supabase 등)

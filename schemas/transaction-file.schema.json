@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://finanz.dev/schemas/transaction-file.schema.json",
+  "$id": "https://bruce-wealth-os.dev/schemas/transaction-file.schema.json",
   "title": "TransactionFile",
   "type": "object",
   "required": [

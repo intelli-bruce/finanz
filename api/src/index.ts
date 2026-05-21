@@ -12,7 +12,7 @@ import * as XLSX from 'xlsx';
 
 const execPromise = promisify(exec);
 
-const DEFAULT_POSTGRES_CLI = 'docker exec -i finanz-postgres psql -U postgres -d postgres';
+const DEFAULT_POSTGRES_CLI = 'docker exec -i bruce-wealth-os-postgres psql -U postgres -d postgres';
 const postgresCliCommand =
   process.env.POSTGRES_PSQL === 'disable'
     ? null
@@ -149,7 +149,7 @@ type CardInstallmentPlanRow = {
 const supabaseUrl = process.env.SUPABASE_URL!;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY!;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
-const BUCKET_NAME = 'finanz-files';
+const BUCKET_NAME = 'bruce-wealth-os-files';
 
 // Multer 설정 - 메모리 스토리지 사용 (Supabase에 업로드하므로 디스크 저장 불필요)
 const upload = multer({

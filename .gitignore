@@ -52,3 +52,6 @@ data/projects/
 .obsidian/cache/
 .obsidian/*.json.bak
 .smtcmp_vector_db.tar.gz
+
+# Local Claude settings
+.claude/settings.local.json

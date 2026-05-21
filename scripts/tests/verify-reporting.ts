@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execPromise = promisify(exec);
-const DEFAULT_POSTGRES_CLI = 'docker exec -i finanz-postgres psql -U postgres -d postgres';
+const DEFAULT_POSTGRES_CLI = 'docker exec -i bruce-wealth-os-postgres psql -U postgres -d postgres';
 
 const postgresCli =
   process.env.POSTGRES_PSQL && process.env.POSTGRES_PSQL.trim().length > 0

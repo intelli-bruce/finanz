@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-계좌간 이체 자동 매칭 (finanz DB)
+계좌간 이체 자동 매칭 (bruce-wealth-os DB)
 
 휴리스틱: 동일 절대값 + 다른 채널 + 시각 ±24시간 + 본인이체 키워드.
 1:1 가장 가까운 시각 페어를 1순위로 잡고, 양쪽 거래에 동일 match_id (UUID) +

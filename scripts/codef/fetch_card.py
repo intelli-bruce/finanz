@@ -1,5 +1,5 @@
 """
-현대카드/신한카드 승인내역(사용내역)을 CODEF로 가져와 finanz JSON 포맷으로 저장.
+현대카드/신한카드 승인내역(사용내역)을 CODEF로 가져와 bruce-wealth-os JSON 포맷으로 저장.
 
 승인내역 = 결제 발생 시점의 거래. 사용자가 보통 "카드 사용내역"이라 부르는 것.
 청구내역(billing)은 월말 청구서 기준이라 시점이 다름 — 필요하면 --kind billing.
@@ -100,7 +100,7 @@ def fetch_card(
     return data.get("resBillingList") or data.get("resCardBillingList") or []
 
 
-def to_finanz_record(idx: int, item: dict, prefix: str, bank_label: str) -> dict:
+def to_bruce_wealth_os_record(idx: int, item: dict, prefix: str, bank_label: str) -> dict:
     used_date = item.get("resUsedDate", "")  # YYYYMMDD
     used_time = item.get("resUsedTime") or "000000"
 
@@ -154,7 +154,7 @@ def to_finanz_record(idx: int, item: dict, prefix: str, bank_label: str) -> dict
     return record
 
 
-def write_finanz_json(
+def write_bruce_wealth_os_json(
     out_dirname: str,
     bank_label: str,
     start: date,
@@ -214,8 +214,8 @@ def main() -> None:
         org_code = os.environ.get(env_key, default_org)
         print(f"[fetch] {bank_label} ({args.kind}) {start} ~ {end}")
         items = fetch_card(codef, connected_id, org_code, start, end, args.kind)
-        records = [to_finanz_record(i + 1, it, prefix, bank_label) for i, it in enumerate(items)]
-        path = write_finanz_json(out_dir, bank_label, start, end, records, args.kind)
+        records = [to_bruce_wealth_os_record(i + 1, it, prefix, bank_label) for i, it in enumerate(items)]
+        path = write_bruce_wealth_os_json(out_dir, bank_label, start, end, records, args.kind)
         print(f"  -> {len(records)} records, saved: {path.relative_to(REPO_ROOT)}")
 
     print("\n다음: node scripts/import-transactions.js  (DB 적재)")

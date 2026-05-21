@@ -1,4 +1,4 @@
-# Finanz Vault — Claude Code Instructions
+# Bruce Wealth OS Vault — Claude Code Instructions
 
 ## Identity
 
@@ -77,7 +77,7 @@ tags: [...]
 
 - bruce-vault: 독서, 건강, 일기, 콘텐츠, 개인 프로젝트 (돈 제외)
 - intellieffect-vault: 고객, 미팅, 산출물(비금전), 영업·마케팅
-- **돈은 모두 여기 finanz** — bv/iv 어디든 금액 발견 시 이 vault로 이전
+- **돈은 모두 여기 bruce-wealth-os** — bv/iv 어디든 금액 발견 시 이 vault로 이전
 
 ## Obsidian Vault 등록
 

@@ -1,4 +1,4 @@
-# Finanz Database Schema (Draft)
+# Bruce Wealth OS Database Schema (Draft)
 
 ## 1. Overview
 PostgreSQL is the canonical data store. JSON files remain for snapshots, but ingestion pipelines primarily interact with **세 가지 테이블만** 사용합니다:

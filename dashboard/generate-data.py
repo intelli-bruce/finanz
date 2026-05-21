@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""finanz 대시보드용 데이터 export — DB → dashboard/data.json"""
+"""bruce-wealth-os 대시보드용 데이터 export — DB → dashboard/data.json"""
 
 import json
 from datetime import date

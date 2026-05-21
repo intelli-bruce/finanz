@@ -1,4 +1,4 @@
--- finanz: SaaS 구독 전용 테이블
+-- bruce-wealth-os: SaaS 구독 전용 테이블
 -- recurring_obligations와 별도. SaaS는 해지/일시중단/요금 변동이 잦아
 -- status enum과 last_charged_at 추적이 필요해 별도 모델링.
 

@@ -1,4 +1,4 @@
--- finanz: 고정비/구독 모니터링 view
+-- bruce-wealth-os: 고정비/구독 모니터링 view
 -- recurring_obligations + subscriptions를 통합해서 다음 결제일·월합계·만료알림 제공
 
 BEGIN;

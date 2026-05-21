@@ -1,4 +1,4 @@
--- Financial reporting views for Finanz
+-- Financial reporting views for Bruce Wealth OS
 -- Usage: psql -U postgres -d postgres -f scripts/sql/reporting_financial_statements.sql
 
 create schema if not exists reporting;

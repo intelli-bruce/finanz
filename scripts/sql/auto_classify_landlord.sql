@@ -1,4 +1,4 @@
--- finanz: 박현주(사무실 임대인) 자동 분류 룰
+-- bruce-wealth-os: 박현주(사무실 임대인) 자동 분류 룰
 -- 매번 import 후 실행하면 신규 박현주 거래도 자동으로 office_rent 분류 + obligation 연결.
 -- 향후 임대인이 바뀌면 metadata.landlord_payee_pattern 업데이트.
 

@@ -23,14 +23,14 @@
 
 > **주의**: 카드 채널의 `closing_balance`는 음수(부채)로 누적됩니다. 숫자를 양수로 보고 싶다면 쿼리에서 `abs()`를 적용하세요.
 
-> **부호 정규화 가이드**: 카카오페이처럼 거래 유형이 `[+] 충전`, `[-] 결제` 형태로 제공되는 경우 JSON → DB 적재 시 반드시 부호를 일치시켜야 합니다. `scripts/db/generate-transaction-sql.js`는 이 프리픽스를 감지해 금액 부호를 자동 보정합니다. 과거 데이터에 잘못된 부호가 남았다면 `cat scripts/sql/fix_amount_signs.sql | docker exec -i finanz-postgres psql -U postgres -d postgres` 명령으로 일괄 수정한 뒤 보고용 뷰를 재생성하세요.
+> **부호 정규화 가이드**: 카카오페이처럼 거래 유형이 `[+] 충전`, `[-] 결제` 형태로 제공되는 경우 JSON → DB 적재 시 반드시 부호를 일치시켜야 합니다. `scripts/db/generate-transaction-sql.js`는 이 프리픽스를 감지해 금액 부호를 자동 보정합니다. 과거 데이터에 잘못된 부호가 남았다면 `cat scripts/sql/fix_amount_signs.sql | docker exec -i bruce-wealth-os-postgres psql -U postgres -d postgres` 명령으로 일괄 수정한 뒤 보고용 뷰를 재생성하세요.
 
 ## 2. 스크립트 실행
 
 1. Docker로 띄운 Postgres 컨테이너를 대상으로 아래 명령을 실행합니다.
 
    ```bash
-   docker exec -i finanz-postgres \
+   docker exec -i bruce-wealth-os-postgres \
      psql -U postgres -d postgres \
      -f scripts/sql/reporting_financial_statements.sql
    ```
@@ -102,7 +102,7 @@ limit 3;
 - 부호 정규화 테스트(`npm run test:reports`)를 CI에 추가해 내부 이체 제거 로직과 함께 항상 통과하는지 확인.
 
 ## 6. API & Web UI 연동
-- `POSTGRES_PSQL` 환경 변수를 통해 CLI 경로를 제어할 수 있습니다. 기본값은 `docker exec -i finanz-postgres psql -U postgres -d postgres`이며, 로컬 `psql`을 쓰고 싶다면 `POSTGRES_PSQL="psql -U postgres -d postgres"` 형태로 지정하세요. 비활성화하려면 `POSTGRES_PSQL=disable`로 설정합니다.
+- `POSTGRES_PSQL` 환경 변수를 통해 CLI 경로를 제어할 수 있습니다. 기본값은 `docker exec -i bruce-wealth-os-postgres psql -U postgres -d postgres`이며, 로컬 `psql`을 쓰고 싶다면 `POSTGRES_PSQL="psql -U postgres -d postgres"` 형태로 지정하세요. 비활성화하려면 `POSTGRES_PSQL=disable`로 설정합니다.
 - API 엔드포인트: `GET /reports/cashflow/monthly` — `reporting.cash_flow_monthly` 뷰를 JSON으로 반환합니다. 내부 이체(자산 채널 간 동일 금액·근접 시각)로 판정된 전표는 자동 제외되므로 실질적인 외부 현금 유입/유출만 집계됩니다.
 - API 엔드포인트: `GET /reports/balance-sheet/monthly` — `reporting.balance_sheet_monthly_summary` 및 `balance_sheet_monthly_channel` 뷰를 함께 조회합니다.
 - API 엔드포인트: `GET /reports/income-sources/monthly` — `reporting.income_source_monthly_summary` 뷰를 조회해 월별 수입원별 합계와 건수를 제공합니다.

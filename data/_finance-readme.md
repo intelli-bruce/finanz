@@ -9,16 +9,16 @@ log-type: expense
 # 💰 Finance
 재무, 세무, 투자 관련 영역.
 
-## 소스코드 (Finanz)
+## 소스코드 (Bruce Wealth OS)
 | 항목 | 값 |
 |------|-----|
-| 경로 | `~/Projects/finanz/` |
-| GitHub | [intelli-bruce/finanz](https://github.com/intelli-bruce/finanz) |
+| 경로 | `/Volumes/WorkSSD/Projects/bruce-wealth-os/` |
+| GitHub | [intelli-bruce/bruce-wealth-os](https://github.com/intelli-bruce/bruce-wealth-os) |
 | 마지막 커밋 | 2026-03-09 |
 | 스택 | Express API + React Web + MCP 서버 (npm workspaces) |
 | 데이터 | Supabase + 마크다운 저장소 |
 
-Finanz는 재무/세무 정보 관리 시스템으로, MCP를 통해 Claude와 연동하고 웹 UI로 시각화 지원.
+Bruce Wealth OS는 재무/세무 정보 관리 시스템으로, MCP를 통해 Claude와 연동하고 웹 UI로 시각화 지원.
 - [[2025 근로소득 원천징수영수증 (최종혁)]]
 - 지출기록/ — 일별 지출 로그
 

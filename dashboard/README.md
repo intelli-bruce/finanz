@@ -1,4 +1,4 @@
-# finanz Dashboard
+# bruce-wealth-os Dashboard
 
 정적 HTML + Chart.js 기반 1페이지 대시보드.
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-finanz 거래 데이터 → Odoo Bank Statement 마이그레이션
+bruce-wealth-os 거래 데이터 → Odoo Bank Statement 마이그레이션
 
 Usage:
     python migrate-to-odoo.py --dry-run   # 매핑 확인만
@@ -22,7 +22,7 @@ ODOO_USER = "bruce@intellieffect.com"
 ODOO_API_KEY = "873c1dcf8df39b03ad497b04e094ce68f35da23a"
 COMPANY_ID = 3
 
-DATA_DIR = "/Volumes/WorkSSD/Projects/finanz/data/transactions"
+DATA_DIR = "/Volumes/WorkSSD/Projects/bruce-wealth-os/data/transactions"
 
 # ─── Journal 매핑 ───
 CHANNEL_JOURNAL = {
@@ -256,7 +256,7 @@ def migrate(dry_run=False):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="finanz → Odoo Bank Statement 마이그레이션")
+    parser = argparse.ArgumentParser(description="bruce-wealth-os → Odoo Bank Statement 마이그레이션")
     parser.add_argument("--dry-run", action="store_true", help="실제 생성 없이 매핑만 확인")
     args = parser.parse_args()
 

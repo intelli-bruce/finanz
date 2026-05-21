@@ -1,4 +1,4 @@
--- finanz: docs/category-rules.md 1·2단계 적용
+-- bruce-wealth-os: docs/category-rules.md 1·2단계 적용
 -- self_transfer (본인 자산 이동) + card_payment (카드대금) 카테고리 자동 라벨링
 -- 양쪽 페어가 DB에 있어 이미 match_id 채워진 거래는 건드리지 않음 (idempotent)
 

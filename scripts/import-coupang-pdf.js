@@ -54,7 +54,7 @@ function parseArgs(argv) {
 }
 
 function extractTextFromPdf(pdfPath) {
-  const cacheDir = path.join(os.tmpdir(), 'finanz_swift_cache');
+  const cacheDir = path.join(os.tmpdir(), 'bruce-wealth-os_swift_cache');
   fs.mkdirSync(cacheDir, { recursive: true });
   const env = {
     ...process.env,

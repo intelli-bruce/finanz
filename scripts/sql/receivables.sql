@@ -1,4 +1,4 @@
--- finanz: receivables (외상매출금/청구권)
+-- bruce-wealth-os: receivables (외상매출금/청구권)
 -- 계약 기반 청구권을 추적. forecast 거래와 달리 변경 비용 낮음.
 -- 실제 입금 발생 시 transactions.receivable_id로 연결.
 

@@ -1,5 +1,5 @@
 """
-신한은행 거래내역을 CODEF로 가져와 finanz의 신한 JSON 포맷으로 저장.
+신한은행 거래내역을 CODEF로 가져와 bruce-wealth-os의 신한 JSON 포맷으로 저장.
 
 저장 위치: data/transactions/shinhan/{from}_{to}_{account_tail}.json
 저장된 JSON은 기존 import-transactions.js가 그대로 처리한다.
@@ -94,8 +94,8 @@ def fetch_transactions(
     return data.get("resTrHistoryList") or []
 
 
-def to_finanz_record(idx: int, item: dict) -> dict:
-    """CODEF 거래 1건을 finanz 신한 JSON 포맷의 한 record로 변환."""
+def to_bruce_wealth_os_record(idx: int, item: dict) -> dict:
+    """CODEF 거래 1건을 bruce-wealth-os 신한 JSON 포맷의 한 record로 변환."""
     tr_date = item.get("resAccountTrDate", "")  # YYYYMMDD
     tr_time = item.get("resAccountTrTime", "000000")  # HHMMSS
 
@@ -140,7 +140,7 @@ def to_finanz_record(idx: int, item: dict) -> dict:
     }
 
 
-def write_finanz_json(account: str, start: date, end: date, records: list[dict]) -> Path:
+def write_bruce_wealth_os_json(account: str, start: date, end: date, records: list[dict]) -> Path:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     tail = account[-6:]
     out_path = OUT_DIR / f"{start.isoformat()}_{end.isoformat()}_{tail}.json"
@@ -190,8 +190,8 @@ def main() -> None:
     for account in accounts:
         print(f"[fetch] {account} {start} ~ {end}")
         items = fetch_transactions(codef, connected_id, org_code, account, start, end)
-        records = [to_finanz_record(i + 1, it) for i, it in enumerate(items)]
-        path = write_finanz_json(account, start, end, records)
+        records = [to_bruce_wealth_os_record(i + 1, it) for i, it in enumerate(items)]
+        path = write_bruce_wealth_os_json(account, start, end, records)
         print(f"  -> {len(records)} records, saved: {path.relative_to(REPO_ROOT)}")
 
     print("\n다음: node scripts/import-transactions.js  (DB 적재)")

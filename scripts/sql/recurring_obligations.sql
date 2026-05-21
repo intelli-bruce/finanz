@@ -1,4 +1,4 @@
--- finanz: 반복 의무지출 테이블
+-- bruce-wealth-os: 반복 의무지출 테이블
 -- 월세/구독료/보험료 등 정기적으로 발생하는 고정비 + 시한성 계약 추적
 -- 실거래(transactions)와 obligation_id로 연결 가능
 

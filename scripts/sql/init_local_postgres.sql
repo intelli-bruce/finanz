@@ -1,4 +1,4 @@
--- Core tables for Finanz (local Postgres)
+-- Core tables for Bruce Wealth OS (local Postgres)
 
 create extension if not exists pgcrypto;
 

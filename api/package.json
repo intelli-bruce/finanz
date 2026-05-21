@@ -1,5 +1,5 @@
 {
-  "name": "finanz-api",
+  "name": "bruce-wealth-os-api",
   "version": "1.0.0",
   "description": "API server for financial markdown data",
   "main": "dist/index.js",

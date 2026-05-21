@@ -1,11 +1,11 @@
-# Finanz
+# Bruce Wealth OS
 
 재무 및 세무 정보를 관리하는 시스템입니다. MCP를 통해 Claude와 직접 상호작용하며, 웹 UI를 통한 시각화를 지원합니다.
 
 ## 구조
 
 ```
-finanz/
+bruce-wealth-os/
 ├── api/          # REST API 서버 (Express)
 ├── mcp/          # MCP 서버 (Claude 연동)
 ├── web/          # 웹 UI (Vite + React)
@@ -46,7 +46,7 @@ SUPABASE_ANON_KEY=your-supabase-anon-key
 PORT=3002
 # Postgres 보고용 CLI 경로 (선택)
 # docker 컨테이너를 사용 중이면 기본값을 그대로 둬도 됩니다.
-# POSTGRES_PSQL="docker exec -i finanz-postgres psql -U postgres -d postgres"
+# POSTGRES_PSQL="docker exec -i bruce-wealth-os-postgres psql -U postgres -d postgres"
 ```
 
 ## 사용 방법
@@ -92,11 +92,11 @@ Claude Desktop의 설정 파일에 다음을 추가하세요:
 ```json
 {
   "mcpServers": {
-    "finanz": {
+    "bruce-wealth-os": {
       "command": "node",
-      "args": ["/Users/brucechoe/Projects/finanz/mcp/dist/index.js"],
+      "args": ["/Volumes/WorkSSD/Projects/bruce-wealth-os/mcp/dist/index.js"],
       "env": {
-        "FINANZ_API_URL": "http://localhost:3002"
+        "BRUCE_WEALTH_OS_API_URL": "http://localhost:3002"
       }
     }
   }

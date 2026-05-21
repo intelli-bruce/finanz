@@ -5,7 +5,7 @@ import { promisify } from 'util';
 const execPromise = promisify(exec);
 
 async function fetchJson(sql: string) {
-  const command = `docker exec -i finanz-postgres psql -U postgres -d postgres -t -A -c "${sql.replace(/"/g, '\"')}"`;
+  const command = `docker exec -i bruce-wealth-os-postgres psql -U postgres -d postgres -t -A -c "${sql.replace(/"/g, '\"')}"`;
   const { stdout } = await execPromise(command, { maxBuffer: 10 * 1024 * 1024 });
   const match = stdout.match(/\[[\s\S]*\]/);
   if (!match) throw new Error(`Unexpected output: ${stdout}`);

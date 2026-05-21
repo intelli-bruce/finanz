@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Odoo Bank Reconciliation — 자동 분류 규칙 생성
-finanz category-rules.md 기반으로 account.reconcile.model 생성
+bruce-wealth-os category-rules.md 기반으로 account.reconcile.model 생성
 """
 
 import xmlrpc.client

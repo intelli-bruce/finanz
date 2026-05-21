@@ -1,10 +1,10 @@
 {
-  "name": "finanz-mcp",
+  "name": "bruce-wealth-os-mcp",
   "version": "1.0.0",
   "description": "MCP server for financial data management",
   "type": "module",
   "bin": {
-    "finanz-mcp": "./dist/index.js"
+    "bruce-wealth-os-mcp": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",

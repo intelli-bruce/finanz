@@ -1,7 +1,7 @@
-# Finanz 자금 흐름 시스템 요구사항
+# Bruce Wealth OS 자금 흐름 시스템 요구사항
 
 ## 1. 시스템 개요
-Finanz는 여러 금융 채널(은행 계좌, 카드, 페이/포인트, 투자 계정 등)에서 추출한 거래 데이터를 공통 스키마로 집계해 자금 흐름을 추적·시각화·시뮬레이션하는 재무 플랫폼이다. 모든 거래는 `occurredAt`, `transactionType`, `amount`, `institution`, `counterAccount`, `metadata`, `raw`를 갖춘 JSON 레코드로 저장된다. 이 문서는 최소 9가지 핵심 기능을 만족하기 위한 구조 및 기능 요구사항을 정리한다.
+Bruce Wealth OS는 여러 금융 채널(은행 계좌, 카드, 페이/포인트, 투자 계정 등)에서 추출한 거래 데이터를 공통 스키마로 집계해 자금 흐름을 추적·시각화·시뮬레이션하는 재무 플랫폼이다. 모든 거래는 `occurredAt`, `transactionType`, `amount`, `institution`, `counterAccount`, `metadata`, `raw`를 갖춘 JSON 레코드로 저장된다. 이 문서는 최소 9가지 핵심 기능을 만족하기 위한 구조 및 기능 요구사항을 정리한다.
 
 ## 2. 데이터 구조 요구사항
 1. **표준 거래 스키마 유지**  
